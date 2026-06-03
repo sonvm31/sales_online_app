@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sales_online_app/core/constants/app_colors.dart';
+import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class CategoryItem extends StatelessWidget {
   final String title;
@@ -21,11 +21,11 @@ class CategoryItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm + 2),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: AppRadius.medium,
           border: Border.all(
             color: isSelected
                 ? Colors.transparent
@@ -35,12 +35,12 @@ class CategoryItem extends StatelessWidget {
         child: Center(
           child: Text(
             title,
-            style: TextStyle(
+            style: AppTextStyles.bodyMedium.copyWith(
               color: isSelected
                   ? Colors.white
                   : (isDark ? AppColors.textLight : AppColors.textDark),
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            )
+            ),
           )
         ),
       ),
