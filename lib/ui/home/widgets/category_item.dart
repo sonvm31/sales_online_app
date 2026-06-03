@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sales_online_app/core/constants/app_colors.dart';
+import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class CategoryItem extends StatelessWidget {
   final String title;

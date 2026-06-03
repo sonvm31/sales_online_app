@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:sales_online_app/core/constants/app_colors.dart';
+import '../constants/app_styles.dart';
 
 class AppTheme {
   static ThemeData get lightTheme{
