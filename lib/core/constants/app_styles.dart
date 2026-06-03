@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppColors {
   static const Color primary = Color(0xFF2F76F6);
@@ -25,76 +26,70 @@ class AppColors {
 class AppSpacing {
   AppSpacing._();
 
-  static const double xs = 4.0;
-  static const double sm = 8.0;
-  static const double md = 16.0;
-  static const double lg = 24.0;
-  static const double xl = 32.0;
-  static const double xxl = 48.0;
+  static double get xs => 4.0.w;
+  static double get sm => 8.0.w;
+  static double get md => 16.0.w;
+  static double get lg => 24.0.w;
+  static double get xl => 32.0.w;
+  static double get xxl => 48.0.w;
 
-  static const SizedBox h4 = SizedBox(height: xs);
-  static const SizedBox h8 = SizedBox(height: sm);
-  static const SizedBox h16 = SizedBox(height: md);
-  static const SizedBox h24 = SizedBox(height: lg);
-  static const SizedBox h32 = SizedBox(height: xl);
+  static SizedBox get h4 => SizedBox(height: 4.0.h);
+  static SizedBox get h8 => SizedBox(height: 8.0.h);
+  static SizedBox get h16 => SizedBox(height: 16.0.h);
+  static SizedBox get h24 => SizedBox(height: 24.0.h);
+  static SizedBox get h32 => SizedBox(height: 32.0.h);
 
-  static const SizedBox w4 = SizedBox(width: xs);
-  static const SizedBox w8 = SizedBox(width: sm);
-  static const SizedBox w16 = SizedBox(width: md);
-  static const SizedBox w24 = SizedBox(width: lg);
+  static SizedBox get w4 => SizedBox(width: 4.0.w);
+  static SizedBox get w8 => SizedBox(width: 8.0.w);
+  static SizedBox get w16 => SizedBox(width: 16.0.w);
+  static SizedBox get w24 => SizedBox(width: 24.0.w);
 }
 
 class AppRadius {
   AppRadius._();
 
-  static const double sm = 4.0;
-  static const double md = 8.0;
-  static const double lg = 12.0;
-  static const double xl = 16.0;
-  static const double circle = 99.0;
-
-  static final BorderRadius small = BorderRadius.circular(sm);
-  static final BorderRadius medium = BorderRadius.circular(md);
-  static final BorderRadius large = BorderRadius.circular(lg);
-  static final BorderRadius xLarge = BorderRadius.circular(xl);
-  static final BorderRadius circular = BorderRadius.circular(circle);
+  static BorderRadius get small => BorderRadius.circular(4.0.r);
+  static BorderRadius get medium => BorderRadius.circular(8.0.r);
+  static BorderRadius get large => BorderRadius.circular(12.0.r);
+  static BorderRadius get xLarge => BorderRadius.circular(16.0.r);
+  static BorderRadius get circular => BorderRadius.circular(99.0.r);
 }
 
 class AppTextStyles {
   AppTextStyles._();
 
-  static const TextStyle display = TextStyle(
-    fontSize: 32,
+  static TextStyle get display => TextStyle(
+    fontSize: 32.0.sp,
     fontWeight: FontWeight.bold,
   );
 
-  static const TextStyle headingLarge = TextStyle(
-    fontSize: 24,
+  static TextStyle get headingLarge => TextStyle(
+    fontSize: 24.0.sp,
     fontWeight: FontWeight.bold,
   );
 
-  static const TextStyle headingMedium = TextStyle(
-    fontSize: 20,
+  static TextStyle get headingMedium => TextStyle(
+    fontSize: 20.0.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
+  static TextStyle get bodyLarge => TextStyle(
+    fontSize: 16.0.sp,
     fontWeight: FontWeight.normal,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
+  static TextStyle get bodyMedium => TextStyle(
+    fontSize: 14.0.sp,
     fontWeight: FontWeight.normal,
   );
 
-  static const TextStyle button = TextStyle(
-    fontSize: 16,
+  static TextStyle get button => TextStyle(
+    fontSize: 16.0.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static const TextStyle caption = TextStyle(
-    fontSize: 12,
+  static TextStyle get caption => TextStyle(
+    fontSize: 12.0.sp,
     fontWeight: FontWeight.w400,
   );
 }

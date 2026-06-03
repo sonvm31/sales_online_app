@@ -38,7 +38,7 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
                 left: AppSpacing.md - 2,
                 right: AppSpacing.md - 2,
                 bottom: AppSpacing.md - 2),

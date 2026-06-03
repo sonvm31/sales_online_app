@@ -11,5 +11,5 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab>{
   int _selectedItem = 0;
 
-  final List<String> _categories = ["Tất cả", "Điện thoại", ]
+
 }
