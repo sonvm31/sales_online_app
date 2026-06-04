@@ -9,10 +9,10 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-          top: AppSpacing.xxl + 12,
-          left: AppSpacing.lg,
-          right: AppSpacing.lg,
-          bottom: AppSpacing.lg
+        top: AppSpacing.xxl + 12,
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        bottom: AppSpacing.lg,
       ),
       decoration: BoxDecoration(
         color: AppColors.primary,
@@ -24,24 +24,29 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-              child: Container(
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
-                  borderRadius: AppRadius.circular,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                child: Row(
-                  children: [
-                    Icon(CupertinoIcons.search, color: Colors.white, size: 24),
-                    AppSpacing.w8,
-                    Text(
-                      "Tìm kiếm sản phẩm ...",
-                      style: AppTextStyles.bodyMedium.copyWith(color: AppColors.whitePlaceholder),
-                    ),
-                  ],
-                ),
+            child: Container(
+              height: 48,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.25),
+                borderRadius: AppRadius.circular,
               ),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Row(
+                children: [
+                  Icon(CupertinoIcons.search, color: Colors.white, size: 24),
+                  AppSpacing.w8,
+                  Expanded(
+                    child: Text(
+                      "Tìm kiếm sản phẩm ...",
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.whitePlaceholder,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
           AppSpacing.w16,
           InkWell(
@@ -65,13 +70,16 @@ class HomeHeader extends StatelessWidget {
                     child: Container(
                       height: 8,
                       width: 8,
-                      decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
