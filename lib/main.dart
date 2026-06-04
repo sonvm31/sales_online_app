@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/theme/app_theme.dart';
 import 'package:sales_online_app/core/theme/theme_provider.dart';
-import 'package:sales_online_app/ui/home/home_screen.dart';
+import 'package:sales_online_app/ui/shared/main_wrapper_screen.dart';
 
 final ThemeProvider themeProvider = ThemeProvider();
 
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.dartTheme,
               themeMode: themeProvider.currentTheme,
-              home: const HomeScreen(),
+              home: const MainWrapperScreen(),
             );
           },
         );
