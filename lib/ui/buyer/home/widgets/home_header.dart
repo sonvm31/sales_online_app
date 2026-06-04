@@ -1,7 +1,6 @@
-  import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
-import 'package:sales_online_app/main.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});

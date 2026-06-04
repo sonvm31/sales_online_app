@@ -6,7 +6,7 @@ class ProductSection extends StatelessWidget {
   final bool isDark;
   final List<Map<String, String>> products;
 
-  const ProductSection({required this.isDark, required this.products});
+  const ProductSection({super.key, required this.isDark, required this.products});
 
   @override
   Widget build(BuildContext context) {
