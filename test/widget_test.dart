@@ -18,10 +18,13 @@ void main() {
   testWidgets('shows validation messages for empty credentials', (
     WidgetTester tester,
   ) async {
+    _setTestViewport(tester);
     final controller = _buildController();
 
     await tester.pumpWidget(_TestApp(controller: controller));
-    await tester.tap(find.byKey(const Key('login_button')));
+    final loginButton = find.byKey(const Key('login_button'));
+    await tester.ensureVisible(loginButton);
+    await tester.tap(loginButton);
     await tester.pump();
 
     expect(find.text('Vui lòng nhập email'), findsOneWidget);
@@ -31,6 +34,7 @@ void main() {
   testWidgets('submits valid credentials through AuthRepository', (
     WidgetTester tester,
   ) async {
+    _setTestViewport(tester);
     final repository = _FakeAuthRepository();
     final controller = _buildController(repository: repository);
 
@@ -40,7 +44,9 @@ void main() {
       'buyer@example.com',
     );
     await tester.enterText(find.byKey(const Key('password_field')), '123456');
-    await tester.tap(find.byKey(const Key('login_button')));
+    final loginButton = find.byKey(const Key('login_button'));
+    await tester.ensureVisible(loginButton);
+    await tester.tap(loginButton);
     await tester.pumpAndSettle();
 
     expect(repository.lastEmail, 'buyer@example.com');
@@ -48,6 +54,13 @@ void main() {
     expect(controller.status, AuthStatus.authenticated);
     expect(controller.session?.accessToken, 'test-token');
   });
+}
+
+void _setTestViewport(WidgetTester tester) {
+  addTearDown(tester.view.resetDevicePixelRatio);
+  addTearDown(tester.view.resetPhysicalSize);
+  tester.view.devicePixelRatio = 1;
+  tester.view.physicalSize = const Size(390, 844);
 }
 
 AuthController _buildController({AuthRepository? repository}) {

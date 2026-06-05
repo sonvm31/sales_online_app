@@ -193,8 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     AppSpacing.h24,
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           'Chưa có tài khoản? ',
