@@ -53,7 +53,7 @@ class CategorySection extends StatelessWidget {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
-                      AppSpacing.h8,
+                      AppSpacing.w8,
                       Text(
                         "Đang tải dữ liệu ... ",
                         style: AppTextStyles.caption,
@@ -89,9 +89,13 @@ class CategorySection extends StatelessWidget {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Text(
-                    "Không có danh mục nào",
-                    style: AppTextStyles.bodyMedium,
+                  child: Row(
+                    children: [
+                      Text(
+                        "Không có danh mục nào",
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ],
                   ),
                 );
               }

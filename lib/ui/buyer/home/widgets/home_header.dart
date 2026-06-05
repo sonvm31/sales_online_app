@@ -9,7 +9,7 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        top: AppSpacing.xxl + 12,
+        top: AppSpacing.xl,
         left: AppSpacing.lg,
         right: AppSpacing.lg,
         bottom: AppSpacing.lg,
@@ -25,7 +25,7 @@ class HomeHeader extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              height: 48,
+              height: 32,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.25),
                 borderRadius: AppRadius.circular,
@@ -53,12 +53,13 @@ class HomeHeader extends StatelessWidget {
             onTap: () => {},
             borderRadius: AppRadius.circular,
             child: Container(
-              height: 48,
-              width: 48,
+              height: 32,
+              width: 32,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
+                shape: BoxShape.rectangle,
+                borderRadius: AppRadius.xLarge,
               ),
               child: Stack(
                 alignment: Alignment.center,
