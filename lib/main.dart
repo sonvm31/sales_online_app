@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
               title: 'Sales Online System',
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.dartTheme,
-              themeMode: themeProvider.currentTheme,
+              themeMode: themeProvider.currTheme,
               home: const MainWrapperScreen(),
             );
           },
