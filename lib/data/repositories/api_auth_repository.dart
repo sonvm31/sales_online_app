@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:sales_online_app/core/network/dio_client.dart';
 import 'package:sales_online_app/data/models/auth_session.dart';
 import 'package:sales_online_app/data/repositories/auth_repository.dart';
 
 class ApiAuthRepository implements AuthRepository {
-  final Dio _dio;
+  final Dio _dio = DioClient().dio;
   final String loginPath;
 
-  const ApiAuthRepository({required Dio dio, this.loginPath = '/auth/login'})
-    : _dio = dio;
+  ApiAuthRepository({this.loginPath = '/auth/login'});
 
   @override
   Future<AuthSession> login({
