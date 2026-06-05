@@ -13,7 +13,7 @@ class ProductCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: AppRadius.xLarge,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
@@ -29,7 +29,7 @@ class ProductCard extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: AppRadius.large,
                 image: DecorationImage(
                   image: NetworkImage(product['image']!),
                   fit: BoxFit.cover,
@@ -38,7 +38,10 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 14, right: 14, bottom: 14),
+            padding: EdgeInsets.only(
+                left: AppSpacing.md - 2,
+                right: AppSpacing.md - 2,
+                bottom: AppSpacing.md - 2),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -46,22 +49,21 @@ class ProductCard extends StatelessWidget {
                   product['name']!,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     color: isDark ? AppColors.textLight : AppColors.textDark,
                   ),
                 ),
-                const SizedBox(height: 8,),
+                AppSpacing.h8,
                 Text(
                   product['price']!,
-                  style: const TextStyle(
+                  style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 8,),
+                AppSpacing.h8,
                 Row(
                   children: [
                     Icon(
@@ -69,15 +71,14 @@ class ProductCard extends StatelessWidget {
                       size: 14,
                       color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight
                     ),
-                    const SizedBox(width: 4,),
+                    AppSpacing.w4,
                     Expanded(
                         child: Text(
                           product['store']!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: AppTextStyles.caption.copyWith(
                             color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-                            fontSize: 11
                           ),
                         )
                     )

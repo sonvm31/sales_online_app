@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.dartTheme,
               themeMode: themeProvider.currentTheme,
-              home: const HomeScreen(),
+              home: const MainWrapperScreen(),
             );
           },
         );
