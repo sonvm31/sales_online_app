@@ -17,7 +17,9 @@ class MockAuthRepository implements AuthRepository {
 
     return AuthSession(
       accessToken: 'mock-token-${DateTime.now().millisecondsSinceEpoch}',
+      firebaseUid: 'mock-${email.toLowerCase()}',
       email: email,
+      role: 'BUYER',
     );
   }
 
@@ -35,7 +37,10 @@ class MockAuthRepository implements AuthRepository {
 
     return AuthSession(
       accessToken: 'mock-token-${DateTime.now().millisecondsSinceEpoch}',
+      firebaseUid: 'mock-${email.toLowerCase()}',
+      fullName: fullName,
       email: email,
+      role: 'BUYER',
     );
   }
 }

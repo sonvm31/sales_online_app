@@ -9,8 +9,8 @@ class ApiAuthRepository implements AuthRepository {
   final String registerPath;
 
   ApiAuthRepository({
-    this.loginPath = '/auth/login',
-    this.registerPath = '/auth/register',
+    this.loginPath = '/users/sync',
+    this.registerPath = '/users/sync',
   });
 
   @override
@@ -18,13 +18,23 @@ class ApiAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final firebaseUid = _fallbackFirebaseUid(normalizedEmail);
+
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         loginPath,
-        data: {'email': email, 'password': password},
+        data: _syncPayload(
+          email: normalizedEmail,
+          firebaseUid: firebaseUid,
+        ),
       );
 
-      return _sessionFromResponse(response.data, fallbackEmail: email);
+      return _sessionFromResponse(
+        response.data,
+        fallbackEmail: normalizedEmail,
+        fallbackFirebaseUid: firebaseUid,
+      );
     } on DioException catch (error) {
       throw AuthException(_messageFromDio(error));
     }
@@ -36,40 +46,76 @@ class ApiAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
+    final normalizedEmail = email.trim().toLowerCase();
+    final firebaseUid = _fallbackFirebaseUid(normalizedEmail);
+
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         registerPath,
-        data: {
-          'fullName': fullName,
-          'email': email,
-          'password': password,
-          'role': 'BUYER',
-        },
+        data: _syncPayload(
+          email: normalizedEmail,
+          firebaseUid: firebaseUid,
+          fullName: fullName.trim(),
+        ),
       );
 
-      return _sessionFromResponse(response.data, fallbackEmail: email);
+      return _sessionFromResponse(
+        response.data,
+        fallbackEmail: normalizedEmail,
+        fallbackFirebaseUid: firebaseUid,
+      );
     } on DioException catch (error) {
       throw AuthException(_messageFromDio(error));
     }
   }
 
+  Map<String, dynamic> _syncPayload({
+    required String email,
+    required String firebaseUid,
+    String? fullName,
+    String? phone,
+    String role = 'BUYER',
+  }) {
+    return <String, dynamic>{
+      'firebaseUid': firebaseUid,
+      'fullName': fullName ?? email.split('@').first,
+      'email': email,
+      'phone': phone ?? '',
+      'role': role,
+    };
+  }
+
   AuthSession _sessionFromResponse(
     Map<String, dynamic>? responseData, {
     required String fallbackEmail,
+    required String fallbackFirebaseUid,
   }) {
     final body = responseData ?? const <String, dynamic>{};
     final nestedData = body['data'];
     final data = nestedData is Map<String, dynamic> ? nestedData : body;
-    final token = data['accessToken'] ?? data['token'] ?? data['idToken'];
+    final firebaseUid = data['firebaseUid'];
+    final email = data['email'];
 
-    if (token is! String || token.isEmpty) {
-      throw const AuthException('Phản hồi không chứa access token.');
+    if ((email is! String || email.isEmpty) && fallbackEmail.isEmpty) {
+      throw const AuthException('Phản hồi không chứa email người dùng.');
     }
 
     return AuthSession(
-      accessToken: token,
-      email: (data['email'] as String?) ?? fallbackEmail,
+      accessToken: (data['accessToken'] ?? data['token'] ?? data['idToken'])
+              as String? ??
+          fallbackFirebaseUid,
+      firebaseUid: firebaseUid is String && firebaseUid.isNotEmpty
+          ? firebaseUid
+          : fallbackFirebaseUid,
+      fullName: data['fullName'] as String?,
+      email: email is String && email.isNotEmpty ? email : fallbackEmail,
+      phone: data['phone'] as String?,
+      role: (data['role'] as String?) ?? 'BUYER',
     );
+  }
+
+  String _fallbackFirebaseUid(String email) {
+    return 'email:${email.trim().toLowerCase()}';
   }
 
   String _messageFromDio(DioException error) {
