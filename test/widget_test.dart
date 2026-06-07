@@ -98,7 +98,12 @@ class _FakeAuthRepository implements AuthRepository {
   }) async {
     lastEmail = email;
     lastPassword = password;
-    return AuthSession(accessToken: 'test-token', email: email);
+    return AuthSession(
+      accessToken: 'test-token',
+      firebaseUid: 'test-firebase-uid',
+      email: email,
+      role: 'BUYER',
+    );
   }
 
   @override
@@ -107,6 +112,12 @@ class _FakeAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return AuthSession(accessToken: 'test-register-token', email: email);
+    return AuthSession(
+      accessToken: 'test-register-token',
+      firebaseUid: 'test-register-firebase-uid',
+      fullName: fullName,
+      email: email,
+      role: 'BUYER',
+    );
   }
 }
