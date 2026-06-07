@@ -62,6 +62,37 @@ class AuthController extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> register({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final session = await _repository.register(
+        fullName: fullName.trim(),
+        email: email.trim(),
+        password: password,
+      );
+      await _sessionService.save(session);
+      _session = session;
+      _status = AuthStatus.authenticated;
+      notifyListeners();
+      return true;
+    } on AuthException catch (error) {
+      _errorMessage = error.message;
+    } catch (_) {
+      _errorMessage = 'Không thể đăng ký. Vui lòng thử lại sau.';
+    }
+
+    _status = AuthStatus.unauthenticated;
+    notifyListeners();
+    return false;
+  }
+
   Future<void> logout() async {
     await _sessionService.clear();
     _session = null;

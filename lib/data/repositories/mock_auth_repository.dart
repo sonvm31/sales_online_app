@@ -20,4 +20,22 @@ class MockAuthRepository implements AuthRepository {
       email: email,
     );
   }
+
+  @override
+  Future<AuthSession> register({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+
+    if (email.toLowerCase() == 'exists@example.com') {
+      throw const AuthException('Email này đã được sử dụng.');
+    }
+
+    return AuthSession(
+      accessToken: 'mock-token-${DateTime.now().millisecondsSinceEpoch}',
+      email: email,
+    );
+  }
 }

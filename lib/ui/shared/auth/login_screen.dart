@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/ui/shared/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final AuthController controller;
@@ -205,10 +206,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Màn hình đăng ký sẽ được bổ sung sau.',
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => RegisterScreen(
+                                  controller: widget.controller,
                                 ),
                               ),
                             );

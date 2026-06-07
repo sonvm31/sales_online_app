@@ -89,6 +89,7 @@ class _TestApp extends StatelessWidget {
 class _FakeAuthRepository implements AuthRepository {
   String? lastEmail;
   String? lastPassword;
+  String? lastFullName;
 
   @override
   Future<AuthSession> login({
@@ -98,5 +99,14 @@ class _FakeAuthRepository implements AuthRepository {
     lastEmail = email;
     lastPassword = password;
     return AuthSession(accessToken: 'test-token', email: email);
+  }
+
+  @override
+  Future<AuthSession> register({
+    required String fullName,
+    required String email,
+    required String password,
+  }) async {
+    return AuthSession(accessToken: 'test-register-token', email: email);
   }
 }
