@@ -7,15 +7,14 @@ class DioClient {
 
   factory DioClient() => _instance;
 
-  DioClient._internal(){
+  DioClient._internal() {
     dio = Dio(
       BaseOptions(
         baseUrl: ApiConfig.baseUrl,
         connectTimeout: ApiConfig.connectTimeout,
         receiveTimeout: ApiConfig.receiveTimeout,
-        responseType: ResponseType.json
-      )
+        responseType: ResponseType.json,
+      ),
     );
   }
-
 }
