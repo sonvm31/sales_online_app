@@ -4,7 +4,7 @@ import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/category_service.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 
-class HomeController  extends ChangeNotifier{
+class HomeController extends ChangeNotifier {
   final CategoryService _categoryService = CategoryService();
   final ProductService _productService = ProductService();
 
@@ -18,27 +18,27 @@ class HomeController  extends ChangeNotifier{
   bool isLoadingMore = false;
   bool _hasMoreProducts = true;
 
-  HomeController(){
+  HomeController() {
     scrollController.addListener(_onScroll);
   }
 
-  void loadAllData(){
+  void loadAllData() {
     loadCategories();
     fetchInitProducts();
   }
 
-  void loadCategories(){
+  void loadCategories() {
     categoriesFuture = _categoryService.fetchCategories();
     notifyListeners();
   }
 
-  void changeCategoryIndex(int index){
+  void changeCategoryIndex(int index) {
     selectedCategoryIndex = index;
     notifyListeners();
   }
 
   Future<void> fetchInitProducts() async {
-    if(isLoadingProducts) return;
+    if (isLoadingProducts) return;
 
     isLoadingProducts = true;
     _currPage = 0;
@@ -46,52 +46,54 @@ class HomeController  extends ChangeNotifier{
     products.clear();
     notifyListeners();
 
-    try{
-      final newProducts = await _productService.fetchProducts(page: _currPage);
+    try {
+      final result = await _productService.fetchProducts(page: _currPage);
+      final List<ProductModel> newProducts = result['products'];
 
       newProducts.shuffle();
 
       products.addAll(newProducts);
-      isLoadingProducts =false;
-      if(newProducts.length < 10) _hasMoreProducts = false;
-    } catch (e){
+      isLoadingProducts = false;
+      _hasMoreProducts = !result['isLast'];
+    } catch (e) {
       isLoadingProducts = false;
     }
     notifyListeners();
   }
 
-  Future<void> fetchMoreProducts () async {
-    if(isLoadingMore || !_hasMoreProducts) return;
+  Future<void> fetchMoreProducts() async {
+    if (isLoadingMore || !_hasMoreProducts) return;
 
     isLoadingMore = true;
     notifyListeners();
 
-    try{
+    try {
       _currPage++;
-      final nextProducts = await _productService.fetchProducts(page: _currPage);
+      final result = await _productService.fetchProducts(page: _currPage);
+      final List<ProductModel> nextProducts = result['products'];
       nextProducts.shuffle();
 
       products.addAll(nextProducts);
       isLoadingMore = false;
-      if(nextProducts.length < 10) _hasMoreProducts =false;
-    } catch (e){
+      _hasMoreProducts = !result['isLast'];
+    } catch (e) {
       isLoadingMore = false;
     }
     notifyListeners();
   }
 
-  void _onScroll () {
-    if(!scrollController.hasClients) return;
+  void _onScroll() {
+    if (!scrollController.hasClients) return;
     final maxScroll = scrollController.position.maxScrollExtent;
     final currScroll = scrollController.position.pixels;
 
-    if(maxScroll - currScroll <= 100){
+    if (maxScroll - currScroll <= 100) {
       fetchMoreProducts();
     }
   }
 
   @override
-  void dispose(){
+  void dispose() {
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     super.dispose();

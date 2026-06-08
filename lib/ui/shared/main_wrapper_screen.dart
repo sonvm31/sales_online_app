@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
-import 'package:sales_online_app/ui/buyer/home/tabs/home_tab.dart';
+import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
 import 'package:sales_online_app/ui/shared/temp_screen.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/shared/profile_screen.dart';
