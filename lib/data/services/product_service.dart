@@ -4,7 +4,7 @@ import 'package:sales_online_app/data/models/product_model.dart';
 class ProductService {
   final _dio = DioClient().dio;
 
-  Future<List<ProductModel>> fetchProducts({
+  Future<Map<String, dynamic>> fetchProducts({
     required int page,
     int size = 10,
   }) async {
@@ -15,8 +15,19 @@ class ProductService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((json) => ProductModel.fromJson(json)).toList();
+        final Map<String, dynamic> responseData = response.data;
+
+        final List<dynamic> content = responseData['content'] ?? [];
+        final List<ProductModel> productList = content
+            .map((json) => ProductModel.fromJson(json))
+            .toList();
+
+        final bool isLastPage = responseData['last'] ?? true;
+
+        return {
+          'products': productList,
+          'isLast': isLastPage
+        };
       } else {
         throw Exception('Lỗi máy chủ: ${response.statusCode}');
       }
