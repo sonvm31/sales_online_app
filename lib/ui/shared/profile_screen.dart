@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sales_online_app/logic/auth/auth_controller.dart'; // Import controller vào
+import 'package:sales_online_app/core/theme/theme_provider.dart';
+import 'package:sales_online_app/main.dart';
+import 'package:sales_online_app/logic/auth/auth_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   final AuthController controller; // Khai báo nhận controller từ Wrapper truyền sang
@@ -13,7 +15,7 @@ class ProfileScreen extends StatelessWidget {
     // Lấy thông tin user hiện tại từ Firebase
     final User? user = FirebaseAuth.instance.currentUser;
     final String displayName = user?.displayName ?? user?.email ?? "Người dùng";
-
+    final isDarkMode = themeProvider.currTheme == ThemeMode.dark;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tài khoản của tôi"),
@@ -31,6 +33,44 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 16.0, top: 8.0, bottom: 4.0),
+                      child: Text(
+                        "Tiện ích khác",
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
+                      ),
+                    ),
+                    const Divider(),
+
+                    // công tắc gạt Switch chuyển Theme
+                    ListTile(
+                      leading: Icon(
+                        isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                        color: isDarkMode ? Colors.amber : Colors.blue,
+                      ),
+                      title: const Text("Chế độ tối (Dark Mode)"),
+                      trailing: Switch(
+                        value: isDarkMode, // Bật công tắc nếu đang là chế độ tối
+                        onChanged: (value) {
+                          // 3. Gọi trực tiếp hàm toggleTheme() từ biến toàn cục themeProvider
+                          themeProvider.toggleTheme();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+
             // Nút Logout
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
@@ -41,15 +81,11 @@ class ProfileScreen extends StatelessWidget {
               icon: const Icon(Icons.logout),
               label: const Text("Đăng xuất", style: TextStyle(fontSize: 16)),
               onPressed: () async {
-                // 1. Đăng xuất khỏi Firebase
+
                 await FirebaseAuth.instance.signOut();
 
-                // 2. Gọi hàm logout của controller (nếu trong controller bạn của bạn có viết hàm tên khác như signOut, hoặc logout, hãy check lại trong file auth_controller.dart nhé)
-                // Hàm này sẽ đổi trạng thái status về AuthStatus.unauthenticated
                 controller.logout();
 
-                // Vì AuthGate ở ngoài cùng đang lắng nghe controller này,
-                // khi status thay đổi, AuthGate sẽ tự động đá user về màn hình LoginScreen chuẩn bài!
               },
             ),
           ],
