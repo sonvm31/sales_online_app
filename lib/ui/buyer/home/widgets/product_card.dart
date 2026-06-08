@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/data/models/product_model.dart';
 
 class ProductCard extends StatelessWidget {
-  final Map<String, String> product;
+  final ProductModel product;
 
   const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final String formattedPrice =
+        "${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ";
 
     return Container(
       decoration: BoxDecoration(
@@ -27,37 +30,67 @@ class ProductCard extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                borderRadius: AppRadius.large,
-                image: DecorationImage(
-                  image: NetworkImage(product['image']!),
-                  fit: BoxFit.cover,
-                ),
+              margin: EdgeInsets.all(AppSpacing.sm),
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(borderRadius: AppRadius.large),
+              child: Image.network(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
+                    child: const Center(
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: isDark
+                        ? AppColors.borderDark
+                        : AppColors.borderLight,
+                    child: const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        color: Colors.grey,
+                        size: 28,
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
           Padding(
             padding: EdgeInsets.only(
-                left: AppSpacing.md - 2,
-                right: AppSpacing.md - 2,
-                bottom: AppSpacing.md - 2),
+              left: AppSpacing.md,
+              right: AppSpacing.md,
+              bottom: AppSpacing.md,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name']!,
+                  product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
                     color: isDark ? AppColors.textLight : AppColors.textDark,
                   ),
                 ),
-                AppSpacing.h8,
+
+                AppSpacing.w4,
                 Text(
-                  product['price']!,
+                  formattedPrice,
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,
@@ -69,18 +102,20 @@ class ProductCard extends StatelessWidget {
                     Icon(
                       Icons.storefront,
                       size: 14,
-                      color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight
+                      color: isDark
+                          ? AppColors.textMutedDark
+                          : AppColors.textMutedLight,
                     ),
                     AppSpacing.w4,
                     Expanded(
-                        child: Text(
-                          product['store']!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(
-                            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
-                          ),
-                        )
+                      child: Text(
+                        product.shopName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight
+                        ),
+                      ),
                     )
                   ],
                 ),

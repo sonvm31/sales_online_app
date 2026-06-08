@@ -1,14 +1,9 @@
 import 'package:dio/dio.dart';
+import 'package:sales_online_app/core/network/dio_client.dart';
 import 'package:sales_online_app/data/models/category_model.dart';
 
 class CategoryService {
-  final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: '',
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 3),
-    ),
-  );
+  final _dio = DioClient().dio;
 
   Future<List<CategoryModel>> fetchCategories() async{
     try{

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
-import 'package:sales_online_app/data/services/category_service.dart';
+import 'package:sales_online_app/ui/buyer/home/controller/home_controller.dart';
+import 'package:sales_online_app/ui/buyer/home/widgets/category_section.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/home_header.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_section.dart';
-
-import '../../../../data/models/category_model.dart';
-import '../widgets/category_section.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -15,65 +13,66 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  int _selectedIndex = 0;
-  final CategoryService _categoryService = CategoryService();
-  late Future<List<CategoryModel>> _categoryFuture;
-
-  final List<Map<String, String>> _products = [
-    {
-      "name": "iPhone 15 Pro Max",
-      "price": "29.990.000đ",
-      "store": "Apple Store VN",
-      "image": "",
-    },
-    {
-      "name": "Samsung Galaxy S24 Ultra",
-      "price": "31.990.000đ",
-      "store": "Samsung Official",
-      "image": "",
-    },
-  ];
+  final HomeController _controller = HomeController();
 
   @override
   void initState() {
     super.initState();
-    _loadCategories();
+    _controller.loadAllData();
   }
 
-  void _loadCategories() {
-    setState(() {
-      _categoryFuture = _categoryService.fetchCategories();
-    });
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
-      children: [
-        const HomeHeader(),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                AppSpacing.h24,
-                CategorySection(
-                  isDark: isDark,
-                  categoriesFuture: _categoryFuture,
-                  selectedIndex: _selectedIndex,
-                  onCategorySelected: (index) =>
-                      setState(() => _selectedIndex = index),
-                  onRetry: _loadCategories,
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) {
+        return Column(
+          children: [
+            const HomeHeader(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async => _controller.loadAllData(),
+                color: AppColors.primary,
+                backgroundColor: isDark ? Colors.grey.shade900 : Colors.white,
+                child: SingleChildScrollView(
+                  controller: _controller.scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 24),
+                      CategorySection(
+                        isDark: isDark,
+                        categoriesFuture: _controller.categoriesFuture,
+                        onCategorySelected: _controller.changeCategoryIndex,
+                        onRetry: _controller.loadCategories,
+                        selectedIndex: _controller.selectedCategoryIndex,
+                      ),
+                      const SizedBox(height: 24),
+                      ProductSection(
+                        isDark: isDark,
+                        products: _controller.products,
+                        onRetry: _controller.fetchInitProducts,
+                        isLoadingMore: _controller.isLoadingMore,
+                        isLoadingProducts: _controller.isLoadingProducts,
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
-                AppSpacing.h24,
-                ProductSection(isDark: isDark, products: _products),
-                AppSpacing.h24,
-              ],
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
