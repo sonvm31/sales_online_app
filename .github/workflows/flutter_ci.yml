@@ -22,6 +22,13 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Create firebase_options.dart
+        shell: bash
+        run: |
+          cat > lib/firebase_options.dart <<'EOF'
+          ${{ secrets.FIREBASE_OPTIONS_DART }}
+          EOF    
+
       - name: Install dependencies
         run: flutter pub get
 
