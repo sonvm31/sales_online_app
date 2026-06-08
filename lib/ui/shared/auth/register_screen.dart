@@ -50,16 +50,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  void _handleGoogleRegister() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Google Sign-In sẽ được tích hợp sau khi Firebase sẵn sàng.',
-        ),
-      ),
-    );
-  }
-
   String? _validateFullName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Vui lòng nhập họ và tên';
@@ -203,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     SizedBox(height: AppSpacing.lg - 2.h),
                     SocialLoginButton(
                       label: 'Đăng ký với Google',
-                      onPressed: null, //isLoading ? null : _handleGoogleRegister, //Update Google Auth later
+                      onPressed: null,
                     ),
                     SizedBox(height: AppSpacing.lg + 2.h),
                     Center(
