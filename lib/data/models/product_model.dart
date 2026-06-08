@@ -21,13 +21,13 @@ class ProductModel {
     final shopData = json['shop'] as Map<String, dynamic>?;
 
     return ProductModel(
-      id: json['id'] as int ?? 0,
-      name: json['name'] as String ?? '',
-      description: json['description'] as String ?? '',
+      id: (json['id'] as int?) ?? 0,
+      name: (json['name'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
       price: (json['price'] as num? ?? 0).toDouble(),
-      stockQuantity: json['stockQuantity'] as int ?? 0,
-      imageUrl: json['imageUrl'] as String ?? '',
-      shopName: shopData != null ? (shopData['name'] as String ?? 'Chưa rõ shop') : 'Chưa rõ shop',
+      stockQuantity: (json['stockQuantity'] as int?) ?? 0,
+      imageUrl: (json['imageUrl'] as String?) ?? '',
+      shopName: shopData != null ? ((shopData['name'] as String?) ?? 'Chưa rõ shop') : 'Chưa rõ shop',
     );
   }
 }
