@@ -4,7 +4,7 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class SocialLoginButton extends StatelessWidget {
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const SocialLoginButton({
     super.key,
