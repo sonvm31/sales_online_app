@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:sales_online_app/core/theme/theme_provider.dart';
+//import 'package:sales_online_app/core/theme/theme_provider.dart'; // Không cần import nếu đã có trong main.dart và sử dụng biến toàn cục
 import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 
