@@ -1,4 +1,3 @@
-```md
 # Sales Online App
 
 Sales Online App is a Flutter mobile application for an online marketplace system. The app supports Buyer and Seller flows, including authentication, marketplace browsing, product listing, cart, checkout, shop management, real-time chat, push notifications, and user support requests.
@@ -440,5 +439,4 @@ The step must run before:
 
 - name: Analyze code
   run: flutter analyze
-```
 ```
