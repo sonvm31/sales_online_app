@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
 import 'package:sales_online_app/ui/shared/temp_screen.dart';
-
+import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/ui/shared/profile_screen.dart';
 class MainWrapperScreen extends StatefulWidget{
-  const MainWrapperScreen({super.key});
+  final AuthController controller; // Thêm dòng này
+  const MainWrapperScreen({super.key, required this.controller});
 
   @override
   State<MainWrapperScreen> createState() => _MainWrapperScreen();
@@ -14,11 +16,11 @@ class MainWrapperScreen extends StatefulWidget{
 class _MainWrapperScreen extends State<MainWrapperScreen>{
   int _currIndex = 0;
 
-  final List<Widget> _tabs = [
+  List<Widget> get _tabs => [
     const HomeTab(),
     const PlaceholderScreen(title: "Màn hình giỏ hàng"),
     const PlaceholderScreen(title: "Màn hình Tin nhắn"),
-    const PlaceholderScreen(title: "Màn hình profile")
+    ProfileScreen(controller: widget.controller), // Truyền controller vào đây
   ];
 
   @override
@@ -44,7 +46,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen>{
         iconSize: 24,
         onTap: (index) => setState(() => _currIndex = index),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: "Trang chủ"),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Trang chủ"),
           BottomNavigationBarItem(
             icon: Badge(
               label: const Text('1'),
