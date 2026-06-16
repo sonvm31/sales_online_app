@@ -8,16 +8,16 @@ class ProductSection extends StatelessWidget {
   final bool isDark;
   final List<ProductModel> products;
   final bool isLoadingProducts;
-  final VoidCallback onRetry;
   final bool isLoadingMore;
+  final VoidCallback onRetry;
 
   const ProductSection({
     super.key,
     required this.isDark,
     required this.products,
-    required this.onRetry,
     required this.isLoadingMore,
     required this.isLoadingProducts,
+    required this.onRetry,
   });
 
   @override
