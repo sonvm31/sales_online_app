@@ -10,11 +10,22 @@ class ProductService {
   Future<Map<String, dynamic>> fetchProducts({
     required int page,
     int size = 10,
+    int? categoryId,
   }) async {
     try {
+      final String url = categoryId == null
+          ? '/products'
+          : '/products/category/$categoryId';
+
+      final Map<String, dynamic> queryParams = {'page': page, 'size': size};
+
+      if (categoryId != null) {
+        queryParams['categoryId'] = categoryId;
+      }
+
       final response = await _dio.get(
-        '/products',
-        queryParameters: {'page': page, 'size': size},
+        url,
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {

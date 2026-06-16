@@ -46,7 +46,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen>{
         iconSize: 24,
         onTap: (index) => setState(() => _currIndex = index),
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: "Trang chủ"),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: "Trang chủ"),
           BottomNavigationBarItem(
             icon: Badge(
               label: const Text('1'),
