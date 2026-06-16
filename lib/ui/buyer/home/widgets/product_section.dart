@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_card.dart';
+import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.dart';
 
 class ProductSection extends StatelessWidget {
   final bool isDark;
@@ -74,7 +75,18 @@ class ProductSection extends StatelessWidget {
                 mainAxisSpacing: 16,
               ),
               itemBuilder: (context, index) {
-                return ProductCard(product: products[index]);
+                final product = products[index];
+                return ProductCard(
+                  product: product,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            ProductDetailScreen(productId: product.id),
+                      ),
+                    );
+                  },
+                );
               },
             ),
           ),
