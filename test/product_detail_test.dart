@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
+import 'package:sales_online_app/data/models/cart_item_model.dart';
+import 'package:sales_online_app/data/services/cart_service.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.dart';
 
 void main() {
@@ -51,12 +54,70 @@ void main() {
 
     expect(find.text('Thu gọn'), findsOneWidget);
   });
+
+  testWidgets('adds product to cart from the detail screen', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final cartService = _FakeCartService();
+    final cartController = CartController(userId: 7, cartService: cartService);
+
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(390, 844),
+        builder: (_, _) => MaterialApp(
+          home: ProductDetailScreen(
+            productId: 12,
+            cartController: cartController,
+            productService: _FakeProductService(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final addButton = find.text('Thêm vào giỏ hàng');
+    await tester.ensureVisible(addButton);
+    await tester.tap(addButton);
+    await tester.pumpAndSettle();
+
+    expect(cartService.lastUserId, 7);
+    expect(cartService.lastProductId, 12);
+    expect(cartService.lastQuantity, 1);
+    expect(find.text('Thêm vào giỏ hàng thành công'), findsOneWidget);
+
+    cartController.dispose();
+  });
 }
 
 class _FakeProductService extends ProductService {
   @override
   Future<ProductModel> fetchProductDetail(int productId) async {
     return ProductModel.fromJson(_productJson);
+  }
+}
+
+class _FakeCartService extends CartService {
+  int? lastUserId;
+  int? lastProductId;
+  int? lastQuantity;
+
+  @override
+  Future<void> addToCart({
+    required int userId,
+    required int productId,
+    int quantity = 1,
+  }) async {
+    lastUserId = userId;
+    lastProductId = productId;
+    lastQuantity = quantity;
+  }
+
+  @override
+  Future<List<CartItemModel>> fetchCart(int userId) async {
+    return const <CartItemModel>[];
   }
 }
 

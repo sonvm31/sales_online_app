@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_card.dart';
 import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.dart';
 
 class SearchResultGrid extends StatelessWidget {
   final List<ProductModel> products;
   final bool isLoadingMore;
+  final CartController? cartController;
 
   const SearchResultGrid({
     super.key,
     required this.products,
     required this.isLoadingMore,
+    this.cartController,
   });
 
   @override
@@ -39,8 +42,10 @@ class SearchResultGrid extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) =>
-                          ProductDetailScreen(productId: product.id),
+                      builder: (_) => ProductDetailScreen(
+                        productId: product.id,
+                        cartController: cartController,
+                      ),
                     ),
                   );
                 },
@@ -48,17 +53,20 @@ class SearchResultGrid extends StatelessWidget {
             },
           ),
         ),
-        if(isLoadingMore)
+        if (isLoadingMore)
           Padding(
             padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
             child: const Center(
               child: SizedBox(
                 width: 24,
                 height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary,),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
               ),
             ),
-          )
+          ),
       ],
     );
   }

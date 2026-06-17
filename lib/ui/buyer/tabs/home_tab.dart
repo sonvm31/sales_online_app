@@ -51,7 +51,9 @@ class _HomeTabState extends State<HomeTab> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const SearchHistoryScreen(),
+                    builder: (context) => SearchHistoryScreen(
+                      cartController: widget.cartController,
+                    ),
                   ),
                 );
               },

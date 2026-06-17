@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/search/search_result_screen.dart';
 
 class SearchHistoryScreen extends StatefulWidget {
-  const SearchHistoryScreen({super.key});
+  final CartController? cartController;
+
+  const SearchHistoryScreen({super.key, this.cartController});
 
   @override
   State<SearchHistoryScreen> createState() => _SearchHistoryScreenState();
@@ -18,7 +21,10 @@ class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SearchResultScreen(keyword: keyword.trim()),
+        builder: (context) => SearchResultScreen(
+          keyword: keyword.trim(),
+          cartController: widget.cartController,
+        ),
       ),
     );
   }
