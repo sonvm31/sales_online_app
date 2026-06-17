@@ -107,6 +107,10 @@ class _CartScreenState extends State<CartScreen> {
     _selectedItemIds.removeWhere((id) => !itemIds.contains(id));
   }
 
+  bool _isAllSelected(List<CartItemModel> items) {
+    return items.isNotEmpty && _selectedItemIds.length == items.length;
+  }
+
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(
       context,
@@ -128,6 +132,35 @@ class _CartScreenState extends State<CartScreen> {
         foregroundColor: textColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          ListenableBuilder(
+            listenable: controller,
+            builder: (context, child) {
+              _syncSelection(controller.items);
+              if (!_isAllSelected(controller.items)) {
+                return const SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: EdgeInsets.only(right: AppSpacing.sm),
+                child: TextButton.icon(
+                  onPressed: controller.isClearing
+                      ? null
+                      : () => _clearCart(context),
+                  icon: controller.isClearing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.delete_sweep_outlined, size: 18),
+                  label: const Text('Xóa giỏ hàng'),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: ListenableBuilder(
         listenable: controller,
@@ -175,9 +208,7 @@ class _CartScreenState extends State<CartScreen> {
             0,
             (sum, item) => sum + item.totalPrice,
           );
-          final isAllSelected =
-              controller.items.isNotEmpty &&
-              _selectedItemIds.length == controller.items.length;
+          final isAllSelected = _isAllSelected(controller.items);
 
           return Column(
             children: [
@@ -212,10 +243,8 @@ class _CartScreenState extends State<CartScreen> {
                 total: selectedTotal,
                 selectedCount: selectedItems.length,
                 isAllSelected: isAllSelected,
-                isClearing: controller.isClearing,
                 onSelectAllChanged: (value) =>
                     _toggleSelectAll(controller.items, value),
-                onClearCart: () => _clearCart(context),
               ),
             ],
           );
@@ -475,17 +504,13 @@ class _CartSummary extends StatelessWidget {
   final double total;
   final int selectedCount;
   final bool isAllSelected;
-  final bool isClearing;
   final ValueChanged<bool?> onSelectAllChanged;
-  final VoidCallback onClearCart;
 
   const _CartSummary({
     required this.total,
     required this.selectedCount,
     required this.isAllSelected,
-    required this.isClearing,
     required this.onSelectAllChanged,
-    required this.onClearCart,
   });
 
   @override
@@ -526,19 +551,6 @@ class _CartSummary extends StatelessWidget {
                     color: mutedColor,
                     fontWeight: FontWeight.w600,
                   ),
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: isClearing ? null : onClearCart,
-                  icon: isClearing
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.delete_sweep_outlined, size: 18),
-                  label: const Text('Xóa giỏ hàng'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
                 ),
               ],
             ),
