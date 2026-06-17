@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
+  final CartController? cartController;
   final ProductService? productService;
 
   const ProductDetailScreen({
     super.key,
     required this.productId,
+    this.cartController,
     this.productService,
   });
 
@@ -20,6 +23,7 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late final ProductService _productService;
   late Future<ProductModel> _productFuture;
+  bool _isAddingToCart = false;
 
   @override
   void initState() {
@@ -34,6 +38,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   void _retry() {
     setState(_loadProduct);
+  }
+
+  Future<void> _addToCart(ProductModel product) async {
+    final cartController = widget.cartController;
+    if (cartController == null || !cartController.hasValidUser) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không xác định được người dùng.')),
+      );
+      return;
+    }
+
+    if (product.stockQuantity <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sản phẩm hiện đã hết hàng.')),
+      );
+      return;
+    }
+
+    setState(() => _isAddingToCart = true);
+    try {
+      await cartController.addToCart(productId: product.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Thêm vào giỏ hàng thành công'),
+          backgroundColor: Colors.green.shade600,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không thể thêm sản phẩm vào giỏ hàng.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isAddingToCart = false);
+      }
+    }
   }
 
   @override
@@ -65,7 +108,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             return _ProductErrorState(onRetry: _retry);
           }
 
-          return _ProductDetailContent(product: snapshot.data!);
+          return _ProductDetailContent(
+            product: snapshot.data!,
+            isAddingToCart: _isAddingToCart,
+            onAddToCart: () => _addToCart(snapshot.data!),
+          );
         },
       ),
     );
@@ -74,8 +121,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
 class _ProductDetailContent extends StatelessWidget {
   final ProductModel product;
+  final bool isAddingToCart;
+  final VoidCallback onAddToCart;
 
-  const _ProductDetailContent({required this.product});
+  const _ProductDetailContent({
+    required this.product,
+    required this.isAddingToCart,
+    required this.onAddToCart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +222,7 @@ class _ProductDetailContent extends StatelessWidget {
               AppSpacing.md,
               AppSpacing.md,
               AppSpacing.md,
-              AppSpacing.xl,
+              AppSpacing.md,
             ),
             child: Container(
               width: double.infinity,
@@ -216,6 +269,43 @@ class _ProductDetailContent extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              0,
+              AppSpacing.md,
+              AppSpacing.xl,
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: FilledButton.icon(
+                onPressed: isAddingToCart ? null : onAddToCart,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  disabledBackgroundColor: AppColors.primary.withValues(
+                    alpha: 0.65,
+                  ),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: AppRadius.xLarge),
+                ),
+                icon: isAddingToCart
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.add_shopping_cart_outlined),
+                label: Text(
+                  isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng',
+                  style: AppTextStyles.button.copyWith(color: Colors.white),
+                ),
               ),
             ),
           ),
