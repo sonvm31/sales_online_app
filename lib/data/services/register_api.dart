@@ -37,11 +37,14 @@ class RegisterApi {
         await user.updateDisplayName(normalizedFullName);
       }
 
-      return _syncUser(
+      final session = await _syncUser(
         firebaseUid: user.uid,
         email: normalizedEmail,
         fullName: normalizedFullName,
       );
+      await user.sendEmailVerification();
+
+      return session;
     } on FirebaseAuthException catch (error) {
       throw AuthException(_messageFromFirebase(error));
     } on DioException catch (error) {

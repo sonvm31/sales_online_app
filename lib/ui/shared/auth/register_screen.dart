@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/ui/shared/auth/check_email_screen.dart';
 import 'package:sales_online_app/ui/shared/auth/widgets/auth_text_field.dart';
-import 'package:sales_online_app/ui/shared/auth/widgets/social_login_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   final AuthController controller;
@@ -19,14 +19,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -45,8 +48,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!mounted) return;
 
-    if (isRegistered && Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    if (isRegistered) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => CheckEmailScreen(email: _emailController.text.trim()),
+        ),
+      );
     }
   }
 
@@ -54,6 +61,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'Vui lòng nhập họ và tên';
     }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập lại mật khẩu';
+    }
+
+    if (value != _passwordController.text) {
+      return 'Mật khẩu nhập lại không khớp';
+    }
+
     return null;
   }
 
@@ -174,6 +193,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     ),
+                    SizedBox(height: AppSpacing.md + 2.h),
+                    AuthTextField(
+                      controller: _confirmPasswordController,
+                      hintText: 'Nhập lại mật khẩu',
+                      icon: Icons.lock_reset_rounded,
+                      obscureText: _obscureConfirmPassword,
+                      validator: _validateConfirmPassword,
+                      suffixIcon: IconButton(
+                        tooltip: _obscureConfirmPassword
+                            ? 'Hiện mật khẩu'
+                            : 'Ẩn mật khẩu',
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureConfirmPassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: mutedColor,
+                        ),
+                      ),
+                    ),
                     if (widget.controller.errorMessage != null) ...[
                       AppSpacing.h16,
                       Text(
@@ -187,13 +230,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     _PrimaryRegisterButton(
                       isLoading: isLoading,
                       onPressed: isLoading ? null : _handleRegister,
-                    ),
-                    SizedBox(height: AppSpacing.lg - 2.h),
-                    _DividerLabel(isDark: isDark),
-                    SizedBox(height: AppSpacing.lg - 2.h),
-                    SocialLoginButton(
-                      label: 'Đăng ký với Google',
-                      onPressed: null,
                     ),
                     SizedBox(height: AppSpacing.lg + 2.h),
                     Center(
@@ -307,34 +343,6 @@ class _PrimaryRegisterButton extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-}
-
-class _DividerLabel extends StatelessWidget {
-  final bool isDark;
-
-  const _DividerLabel({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textColor = isDark
-        ? AppColors.textMutedDark
-        : AppColors.textMutedLight;
-
-    return Row(
-      children: [
-        Expanded(child: Divider(color: dividerColor)),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text(
-            'Hoặc',
-            style: AppTextStyles.bodyMedium.copyWith(color: textColor),
-          ),
-        ),
-        Expanded(child: Divider(color: dividerColor)),
-      ],
     );
   }
 }
