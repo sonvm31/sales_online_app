@@ -90,12 +90,64 @@ void main() {
 
     cartController.dispose();
   });
+
+  testWidgets('opens the shop from the product detail screen', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(390, 844);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final productService = _FakeProductService();
+
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(390, 844),
+        builder: (_, _) => MaterialApp(
+          home: ProductDetailScreen(
+            productId: 12,
+            productService: productService,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final viewShopButton = find.text('Xem cửa hàng');
+    await tester.ensureVisible(viewShopButton);
+    await tester.tap(viewShopButton);
+    await tester.pumpAndSettle();
+
+    expect(productService.lastShopId, 3);
+    expect(find.text('Sản phẩm của cửa hàng'), findsOneWidget);
+    expect(find.text('Đèn bàn tối giản'), findsOneWidget);
+  });
 }
 
 class _FakeProductService extends ProductService {
+  int? lastShopId;
+
   @override
   Future<ProductModel> fetchProductDetail(int productId) async {
     return ProductModel.fromJson(_productJson);
+  }
+
+  @override
+  Future<Map<String, dynamic>> searchProducts({
+    String? keyword,
+    int? categoryId,
+    int? shopId,
+    double? minPrice,
+    double? maxPrice,
+    String sortBy = 'id',
+    String sortDirection = 'asc',
+    required int page,
+    int size = 10,
+  }) async {
+    lastShopId = shopId;
+    return <String, dynamic>{
+      'products': <ProductModel>[ProductModel.fromJson(_productJson)],
+      'isLast': true,
+    };
   }
 }
 
