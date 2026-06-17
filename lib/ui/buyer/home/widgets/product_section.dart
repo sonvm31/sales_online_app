@@ -7,6 +7,7 @@ import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.d
 class ProductSection extends StatelessWidget {
   final bool isDark;
   final List<ProductModel> products;
+  final int? userId;
   final bool isLoadingProducts;
   final bool isLoadingMore;
   final VoidCallback onRetry;
@@ -15,6 +16,7 @@ class ProductSection extends StatelessWidget {
     super.key,
     required this.isDark,
     required this.products,
+    required this.userId,
     required this.isLoadingMore,
     required this.isLoadingProducts,
     required this.onRetry,
@@ -81,8 +83,10 @@ class ProductSection extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
-                        builder: (_) =>
-                            ProductDetailScreen(productId: product.id),
+                        builder: (_) => ProductDetailScreen(
+                          productId: product.id,
+                          userId: userId,
+                        ),
                       ),
                     );
                   },
