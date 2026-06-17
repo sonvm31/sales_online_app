@@ -10,6 +10,7 @@ class HomeController extends ChangeNotifier {
 
   late Future<List<CategoryModel>> categoriesFuture;
   int selectedCategoryIndex = 0;
+  int? _selectedCategoryId;
 
   final ScrollController scrollController = ScrollController();
   final List<ProductModel> products = [];
@@ -32,9 +33,14 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void changeCategoryIndex(int index) {
+  void changeCategoryIndex(int index, int? categoryId) {
+    if (selectedCategoryIndex == index) return;
+
     selectedCategoryIndex = index;
+    _selectedCategoryId = categoryId;
     notifyListeners();
+
+    fetchInitProducts();
   }
 
   Future<void> fetchInitProducts() async {
@@ -47,21 +53,25 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _productService.fetchProducts(page: _currPage);
+      final result = await _productService.fetchProducts(
+        page: _currPage,
+        categoryId: _selectedCategoryId,
+      );
       final List<ProductModel> newProducts = result['products'];
 
       newProducts.shuffle();
 
       products.addAll(newProducts);
-      isLoadingProducts = false;
       _hasMoreProducts = !result['isLast'];
     } catch (e) {
+      debugPrint("Lỗi nạp sản phẩm trang 1: $e");
+    } finally {
       isLoadingProducts = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
-  Future<void> fetchMoreProducts() async {
+  Future<void> _fetchMoreProducts() async {
     if (isLoadingMore || !_hasMoreProducts) return;
 
     isLoadingMore = true;
@@ -69,17 +79,21 @@ class HomeController extends ChangeNotifier {
 
     try {
       _currPage++;
-      final result = await _productService.fetchProducts(page: _currPage);
+      final result = await _productService.fetchProducts(
+        page: _currPage,
+        categoryId: _selectedCategoryId,
+      );
       final List<ProductModel> nextProducts = result['products'];
       nextProducts.shuffle();
 
       products.addAll(nextProducts);
-      isLoadingMore = false;
       _hasMoreProducts = !result['isLast'];
     } catch (e) {
+      debugPrint("Lỗi nạp sản phẩm trang 1: $e");
+    } finally {
       isLoadingMore = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   void _onScroll() {
@@ -88,7 +102,7 @@ class HomeController extends ChangeNotifier {
     final currScroll = scrollController.position.pixels;
 
     if (maxScroll - currScroll <= 100) {
-      fetchMoreProducts();
+      _fetchMoreProducts();
     }
   }
 

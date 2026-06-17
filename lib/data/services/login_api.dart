@@ -79,12 +79,14 @@ class LoginApi {
 
     final firebaseUid = data['firebaseUid'];
     final email = data['email'];
+    final userId = data['id'];
 
     if ((email is! String || email.isEmpty) && fallbackEmail.isEmpty) {
       throw const AuthException('Phản hồi không chứa email người dùng.');
     }
 
     return AuthSession(
+      userId: _parseUserId(userId),
       accessToken:
           (data['accessToken'] ?? data['token'] ?? data['idToken'])
               as String? ??
@@ -97,6 +99,16 @@ class LoginApi {
       phone: data['phone'] as String?,
       role: (data['role'] as String?) ?? 'BUYER',
     );
+  }
+
+  int? _parseUserId(dynamic value) {
+    if (value is num) {
+      return value.toInt();
+    }
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 
   String _resolveFullName(String? fullName, String email) {
