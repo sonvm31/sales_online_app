@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/ui/shared/auth/check_email_screen.dart';
 import 'package:sales_online_app/ui/shared/auth/widgets/auth_text_field.dart';
 import 'package:sales_online_app/ui/shared/auth/widgets/social_login_button.dart';
 
@@ -19,14 +20,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -45,8 +49,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!mounted) return;
 
-    if (isRegistered && Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    if (isRegistered) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => CheckEmailScreen(email: _emailController.text.trim()),
+        ),
+      );
     }
   }
 
@@ -54,6 +62,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.trim().isEmpty) {
       return 'Vui lòng nhập họ và tên';
     }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Vui lòng nhập lại mật khẩu';
+    }
+
+    if (value != _passwordController.text) {
+      return 'Mật khẩu nhập lại không khớp';
+    }
+
     return null;
   }
 
@@ -168,6 +188,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                         icon: Icon(
                           _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: mutedColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.md + 2.h),
+                    AuthTextField(
+                      controller: _confirmPasswordController,
+                      hintText: 'Nhập lại mật khẩu',
+                      icon: Icons.lock_reset_rounded,
+                      obscureText: _obscureConfirmPassword,
+                      validator: _validateConfirmPassword,
+                      suffixIcon: IconButton(
+                        tooltip: _obscureConfirmPassword
+                            ? 'Hiện mật khẩu'
+                            : 'Ẩn mật khẩu',
+                        onPressed: () {
+                          setState(() {
+                            _obscureConfirmPassword = !_obscureConfirmPassword;
+                          });
+                        },
+                        icon: Icon(
+                          _obscureConfirmPassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
                           color: mutedColor,
