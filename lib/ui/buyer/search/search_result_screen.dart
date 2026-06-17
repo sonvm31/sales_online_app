@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/search/controller/search_result_controller.dart';
 import 'package:sales_online_app/ui/buyer/search/widgets/filter_sort_bar.dart';
 import 'package:sales_online_app/ui/buyer/search/widgets/search_result_grid.dart';
@@ -7,8 +8,15 @@ import '../../../core/constants/app_styles.dart';
 
 class SearchResultScreen extends StatefulWidget {
   final String keyword;
+  final CartController? cartController;
+  final ValueChanged<int>? onTabSelected;
 
-  const SearchResultScreen({super.key, required this.keyword});
+  const SearchResultScreen({
+    super.key,
+    required this.keyword,
+    this.cartController,
+    this.onTabSelected,
+  });
 
   @override
   State<SearchResultScreen> createState() => _SearchResultScreenState();
@@ -75,8 +83,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           SearchResultGrid(
             products: _controller.products,
             isLoadingMore: _controller.isLoadingMore,
+            cartController: widget.cartController,
+            onTabSelected: widget.onTabSelected,
           ),
-          const SizedBox(height: 24)
+          const SizedBox(height: 24),
         ],
       ),
     );

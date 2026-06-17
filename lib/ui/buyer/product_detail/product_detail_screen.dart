@@ -3,17 +3,20 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
+import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
   final CartController? cartController;
   final ProductService? productService;
+  final ValueChanged<int>? onTabSelected;
 
   const ProductDetailScreen({
     super.key,
     required this.productId,
     this.cartController,
     this.productService,
+    this.onTabSelected,
   });
 
   @override
@@ -79,6 +82,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  void _openShop(ProductModel product) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ShopScreen(
+          shop: product.shop,
+          cartController: widget.cartController,
+          productService: _productService,
+          onTabSelected: widget.onTabSelected,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -112,6 +128,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             product: snapshot.data!,
             isAddingToCart: _isAddingToCart,
             onAddToCart: () => _addToCart(snapshot.data!),
+            onViewShop: () => _openShop(snapshot.data!),
           );
         },
       ),
@@ -123,11 +140,13 @@ class _ProductDetailContent extends StatelessWidget {
   final ProductModel product;
   final bool isAddingToCart;
   final VoidCallback onAddToCart;
+  final VoidCallback onViewShop;
 
   const _ProductDetailContent({
     required this.product,
     required this.isAddingToCart,
     required this.onAddToCart,
+    required this.onViewShop,
   });
 
   @override
@@ -232,40 +251,65 @@ class _ProductDetailContent extends StatelessWidget {
                 borderRadius: AppRadius.xLarge,
                 border: Border.all(color: borderColor),
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _ShopAvatar(
-                    avatarUrl: product.shop.avatarUrl,
-                    shopName: product.shop.name,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _ShopAvatar(
+                        avatarUrl: product.shop.avatarUrl,
+                        shopName: product.shop.name,
+                      ),
+                      AppSpacing.w16,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              product.shop.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: textColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            AppSpacing.h4,
+                            Text(
+                              product.shop.description.isEmpty
+                                  ? 'Shop chưa có mô tả.'
+                                  : product.shop.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                color: mutedColor,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  AppSpacing.w16,
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.shop.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: textColor,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        AppSpacing.h4,
-                        Text(
-                          product.shop.description.isEmpty
-                              ? 'Shop chưa có mô tả.'
-                              : product.shop.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: mutedColor,
-                            height: 1.4,
-                          ),
-                        ),
-                      ],
+                  AppSpacing.h16,
+                  OutlinedButton.icon(
+                    onPressed: onViewShop,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.large,
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                    ),
+                    icon: const Icon(Icons.storefront_outlined, size: 18),
+                    label: Text(
+                      'Xem cửa hàng',
+                      style: AppTextStyles.button.copyWith(
+                        color: AppColors.primary,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
