@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class HomeHeader extends StatelessWidget {
-  const HomeHeader({super.key});
+  final VoidCallback onSearchTap;
+
+  const HomeHeader({super.key, required this.onSearchTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,27 +26,30 @@ class HomeHeader extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Container(
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.25),
-                borderRadius: AppRadius.circular,
-              ),
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: Row(
-                children: [
-                  Icon(CupertinoIcons.search, color: Colors.white, size: 24),
-                  AppSpacing.w8,
-                  Expanded(
-                    child: Text(
-                      "Tìm kiếm sản phẩm ...",
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.whitePlaceholder,
+            child: GestureDetector(
+              onTap: onSearchTap,
+              child: Container(
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  borderRadius: AppRadius.circular,
+                ),
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.search, color: Colors.white, size: 24),
+                    AppSpacing.w8,
+                    Expanded(
+                      child: Text(
+                        "Tìm kiếm sản phẩm ...",
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.whitePlaceholder,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
