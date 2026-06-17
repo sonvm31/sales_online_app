@@ -1,4 +1,5 @@
 class AuthSession {
+  final int? userId;
   final String accessToken;
   final String firebaseUid;
   final String? fullName;
@@ -7,6 +8,7 @@ class AuthSession {
   final String role;
 
   const AuthSession({
+    this.userId,
     required this.accessToken,
     required this.firebaseUid,
     required this.email,
