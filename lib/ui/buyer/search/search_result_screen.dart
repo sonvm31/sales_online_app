@@ -9,11 +9,13 @@ import '../../../core/constants/app_styles.dart';
 class SearchResultScreen extends StatefulWidget {
   final String keyword;
   final CartController? cartController;
+  final ValueChanged<int>? onTabSelected;
 
   const SearchResultScreen({
     super.key,
     required this.keyword,
     this.cartController,
+    this.onTabSelected,
   });
 
   @override
@@ -82,6 +84,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             products: _controller.products,
             isLoadingMore: _controller.isLoadingMore,
             cartController: widget.cartController,
+            onTabSelected: widget.onTabSelected,
           ),
           const SizedBox(height: 24),
         ],

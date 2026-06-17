@@ -9,12 +9,14 @@ class ProductDetailScreen extends StatefulWidget {
   final int productId;
   final CartController? cartController;
   final ProductService? productService;
+  final ValueChanged<int>? onTabSelected;
 
   const ProductDetailScreen({
     super.key,
     required this.productId,
     this.cartController,
     this.productService,
+    this.onTabSelected,
   });
 
   @override
@@ -87,6 +89,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           shop: product.shop,
           cartController: widget.cartController,
           productService: _productService,
+          onTabSelected: widget.onTabSelected,
         ),
       ),
     );

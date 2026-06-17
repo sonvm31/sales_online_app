@@ -9,12 +9,14 @@ class SearchResultGrid extends StatelessWidget {
   final List<ProductModel> products;
   final bool isLoadingMore;
   final CartController? cartController;
+  final ValueChanged<int>? onTabSelected;
 
   const SearchResultGrid({
     super.key,
     required this.products,
     required this.isLoadingMore,
     this.cartController,
+    this.onTabSelected,
   });
 
   @override
@@ -45,6 +47,7 @@ class SearchResultGrid extends StatelessWidget {
                       builder: (_) => ProductDetailScreen(
                         productId: product.id,
                         cartController: cartController,
+                        onTabSelected: onTabSelected,
                       ),
                     ),
                   );

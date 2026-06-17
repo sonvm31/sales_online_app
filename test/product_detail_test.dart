@@ -106,6 +106,7 @@ void main() {
           home: ProductDetailScreen(
             productId: 12,
             productService: productService,
+            onTabSelected: (_) {},
           ),
         ),
       ),
@@ -120,6 +121,7 @@ void main() {
     expect(productService.lastShopId, 3);
     expect(find.text('Sản phẩm của cửa hàng'), findsOneWidget);
     expect(find.text('Đèn bàn tối giản'), findsOneWidget);
+    expect(find.text('Giỏ hàng'), findsOneWidget);
   });
 }
 

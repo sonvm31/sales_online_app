@@ -5,8 +5,13 @@ import 'package:sales_online_app/ui/buyer/search/search_result_screen.dart';
 
 class SearchHistoryScreen extends StatefulWidget {
   final CartController? cartController;
+  final ValueChanged<int>? onTabSelected;
 
-  const SearchHistoryScreen({super.key, this.cartController});
+  const SearchHistoryScreen({
+    super.key,
+    this.cartController,
+    this.onTabSelected,
+  });
 
   @override
   State<SearchHistoryScreen> createState() => _SearchHistoryScreenState();
@@ -24,6 +29,7 @@ class _SearchHistoryScreenState extends State<SearchHistoryScreen> {
         builder: (context) => SearchResultScreen(
           keyword: keyword.trim(),
           cartController: widget.cartController,
+          onTabSelected: widget.onTabSelected,
         ),
       ),
     );

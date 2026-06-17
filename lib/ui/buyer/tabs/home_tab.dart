@@ -11,11 +11,13 @@ import 'package:sales_online_app/ui/buyer/search/search_history_screen.dart';
 class HomeTab extends StatefulWidget {
   final AuthController controller;
   final CartController cartController;
+  final ValueChanged<int> onTabSelected;
 
   const HomeTab({
     super.key,
     required this.controller,
     required this.cartController,
+    required this.onTabSelected,
   });
 
   @override
@@ -53,6 +55,7 @@ class _HomeTabState extends State<HomeTab> {
                   MaterialPageRoute(
                     builder: (context) => SearchHistoryScreen(
                       cartController: widget.cartController,
+                      onTabSelected: widget.onTabSelected,
                     ),
                   ),
                 );
@@ -82,6 +85,7 @@ class _HomeTabState extends State<HomeTab> {
                         isDark: isDark,
                         products: _controller.products,
                         cartController: widget.cartController,
+                        onTabSelected: widget.onTabSelected,
                         isLoadingMore: _controller.isLoadingMore,
                         isLoadingProducts: _controller.isLoadingProducts,
                         onRetry: _controller.fetchInitProducts,

@@ -21,11 +21,20 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
   int _currIndex = 0;
 
   List<Widget> get _tabs => [
-    HomeTab(controller: widget.controller, cartController: _cartController),
+    HomeTab(
+      controller: widget.controller,
+      cartController: _cartController,
+      onTabSelected: _selectTab,
+    ),
     CartScreen(controller: _cartController),
     const PlaceholderScreen(title: "Màn hình Tin nhắn"),
     ProfileScreen(controller: widget.controller), // Truyền controller vào đây
   ];
+
+  void _selectTab(int index) {
+    if (!mounted) return;
+    setState(() => _currIndex = index);
+  }
 
   @override
   void initState() {
@@ -65,7 +74,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
         ),
         unselectedLabelStyle: const TextStyle(fontSize: 12),
         iconSize: 24,
-        onTap: (index) => setState(() => _currIndex = index),
+        onTap: _selectTab,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

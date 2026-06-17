@@ -9,6 +9,7 @@ class ProductSection extends StatelessWidget {
   final bool isDark;
   final List<ProductModel> products;
   final CartController cartController;
+  final ValueChanged<int>? onTabSelected;
   final bool isLoadingProducts;
   final bool isLoadingMore;
   final VoidCallback onRetry;
@@ -18,6 +19,7 @@ class ProductSection extends StatelessWidget {
     required this.isDark,
     required this.products,
     required this.cartController,
+    this.onTabSelected,
     required this.isLoadingMore,
     required this.isLoadingProducts,
     required this.onRetry,
@@ -87,6 +89,7 @@ class ProductSection extends StatelessWidget {
                         builder: (_) => ProductDetailScreen(
                           productId: product.id,
                           cartController: cartController,
+                          onTabSelected: onTabSelected,
                         ),
                       ),
                     );

@@ -10,12 +10,14 @@ class ShopScreen extends StatefulWidget {
   final ShopModel shop;
   final CartController? cartController;
   final ProductService? productService;
+  final ValueChanged<int>? onTabSelected;
 
   const ShopScreen({
     super.key,
     required this.shop,
     this.cartController,
     this.productService,
+    this.onTabSelected,
   });
 
   @override
@@ -124,9 +126,15 @@ class _ShopScreenState extends State<ShopScreen> {
           productId: product.id,
           cartController: widget.cartController,
           productService: _productService,
+          onTabSelected: widget.onTabSelected,
         ),
       ),
     );
+  }
+
+  void _handleBottomNavigationTap(int index) {
+    widget.onTabSelected?.call(index);
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
@@ -243,6 +251,92 @@ class _ShopScreenState extends State<ShopScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: widget.onTabSelected == null
+          ? null
+          : _ShopBottomNavigationBar(
+              cartController: widget.cartController,
+              onTap: _handleBottomNavigationTap,
+            ),
+    );
+  }
+}
+
+class _ShopBottomNavigationBar extends StatelessWidget {
+  final CartController? cartController;
+  final ValueChanged<int> onTap;
+
+  const _ShopBottomNavigationBar({
+    required this.cartController,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return BottomNavigationBar(
+      currentIndex: 0,
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Theme.of(
+        context,
+      ).bottomNavigationBarTheme.backgroundColor,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: isDark
+          ? AppColors.textMutedDark
+          : AppColors.textMutedLight,
+      selectedLabelStyle: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+      unselectedLabelStyle: const TextStyle(fontSize: 12),
+      iconSize: 24,
+      onTap: onTap,
+      items: [
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.home_outlined),
+          label: 'Trang chủ',
+        ),
+        BottomNavigationBarItem(
+          icon: cartController == null
+              ? const Icon(Icons.shopping_cart_outlined)
+              : ListenableBuilder(
+                  listenable: cartController!,
+                  builder: (context, child) {
+                    return _ShopCartNavIcon(count: cartController!.itemCount);
+                  },
+                ),
+          label: 'Giỏ hàng',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.chat_bubble_outline),
+          label: 'Tin nhắn',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          label: 'Cá nhân',
+        ),
+      ],
+    );
+  }
+}
+
+class _ShopCartNavIcon extends StatelessWidget {
+  final int count;
+
+  const _ShopCartNavIcon({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    const icon = Icon(Icons.shopping_cart_outlined);
+
+    if (count <= 0) {
+      return icon;
+    }
+
+    return Badge(
+      label: Text(count > 99 ? '99+' : '$count'),
+      backgroundColor: Colors.red,
+      child: icon,
     );
   }
 }
