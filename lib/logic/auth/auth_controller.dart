@@ -72,14 +72,13 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final session = await _repository.register(
+      await _repository.register(
         fullName: fullName.trim(),
         email: email.trim(),
         password: password,
       );
-      await _sessionService.save(session);
-      _session = session;
-      _status = AuthStatus.authenticated;
+      _session = null;
+      _status = AuthStatus.unauthenticated;
       notifyListeners();
       return true;
     } on AuthException catch (error) {

@@ -31,10 +31,20 @@ class LoginApi {
         throw const AuthException('Không thể xác thực tài khoản.');
       }
 
+      await user.reload();
+      final refreshedUser = _firebaseAuth.currentUser ?? user;
+      if (!refreshedUser.emailVerified) {
+        await refreshedUser.sendEmailVerification();
+        await _firebaseAuth.signOut();
+        throw const AuthException(
+          'Vui lòng xác thực email trước khi đăng nhập. Link xác thực đã được gửi lại.',
+        );
+      }
+
       return _syncUser(
-        firebaseUid: user.uid,
+        firebaseUid: refreshedUser.uid,
         email: normalizedEmail,
-        fullName: user.displayName,
+        fullName: refreshedUser.displayName,
       );
     } on FirebaseAuthException catch (error) {
       throw AuthException(_messageFromFirebase(error));
