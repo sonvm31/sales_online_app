@@ -4,7 +4,6 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/shared/auth/check_email_screen.dart';
 import 'package:sales_online_app/ui/shared/auth/widgets/auth_text_field.dart';
-import 'package:sales_online_app/ui/shared/auth/widgets/social_login_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   final AuthController controller;
@@ -232,13 +231,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       isLoading: isLoading,
                       onPressed: isLoading ? null : _handleRegister,
                     ),
-                    SizedBox(height: AppSpacing.lg - 2.h),
-                    _DividerLabel(isDark: isDark),
-                    SizedBox(height: AppSpacing.lg - 2.h),
-                    SocialLoginButton(
-                      label: 'Đăng ký với Google',
-                      onPressed: null,
-                    ),
                     SizedBox(height: AppSpacing.lg + 2.h),
                     Center(
                       child: Wrap(
@@ -351,34 +343,6 @@ class _PrimaryRegisterButton extends StatelessWidget {
                 ),
               ),
       ),
-    );
-  }
-}
-
-class _DividerLabel extends StatelessWidget {
-  final bool isDark;
-
-  const _DividerLabel({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    final dividerColor = isDark ? AppColors.borderDark : AppColors.borderLight;
-    final textColor = isDark
-        ? AppColors.textMutedDark
-        : AppColors.textMutedLight;
-
-    return Row(
-      children: [
-        Expanded(child: Divider(color: dividerColor)),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text(
-            'Hoặc',
-            style: AppTextStyles.bodyMedium.copyWith(color: textColor),
-          ),
-        ),
-        Expanded(child: Divider(color: dividerColor)),
-      ],
     );
   }
 }
