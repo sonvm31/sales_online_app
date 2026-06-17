@@ -23,10 +23,7 @@ class ProductService {
         queryParams['categoryId'] = categoryId;
       }
 
-      final response = await _dio.get(
-        url,
-        queryParameters: queryParams,
-      );
+      final response = await _dio.get(url, queryParameters: queryParams);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = response.data;
@@ -47,18 +44,61 @@ class ProductService {
     }
   }
 
-  Future<List<ProductModel>> searchProducts(String keyword) async {
+  Future<Map<String, dynamic>> searchProducts({
+    String? keyword,
+    int? categoryId,
+    int? shopId,
+    double? minPrice,
+    double? maxPrice,
+    String sortBy = 'id',
+    String sortDirection = 'asc',
+    required int page,
+    int size = 10,
+  }) async {
     try {
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'size': size,
+        'sortBy': sortBy,
+        'sortDirection': sortDirection,
+      };
+
+      if (keyword != null && keyword.trim().isNotEmpty) {
+        queryParams['keyword'] = keyword.trim();
+      }
+      if (categoryId != null) {
+        queryParams['categoryId'] = categoryId;
+      }
+      if (shopId != null) {
+        queryParams['shopId'] = shopId;
+      }
+      if (minPrice != null) {
+        queryParams['minPrice'] = minPrice.toString();
+      }
+      if (maxPrice != null) {
+        queryParams['maxPrice'] = maxPrice.toString();
+      }
+
       final response = await _dio.get(
         '/products/search',
-        queryParameters: {'keyword': keyword},
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        return data.map((json) => ProductModel.fromJson(json)).toList();
+        final Map<String, dynamic> responseData = response.data;
+
+        final List<dynamic> content = responseData['content'] ?? [];
+        final List<ProductModel> productList = content
+            .map((json) => ProductModel.fromJson(json))
+            .toList();
+        final bool isLastPage = responseData['last'] ?? true;
+
+        return {
+          'products': productList,
+          'isLast': isLastPage
+        };
       } else {
-        throw Exception('Lỗi kết nối máy chủ: ${response.statusCode}');
+        throw Exception('Lỗi kết nối API Search: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Không thể tìm kiếm sản phẩm: $e');

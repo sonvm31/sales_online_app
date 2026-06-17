@@ -6,6 +6,7 @@ import 'package:sales_online_app/ui/buyer/home/controller/home_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/category_section.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/home_header.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_section.dart';
+import 'package:sales_online_app/ui/buyer/search/search_history_screen.dart';
 
 class HomeTab extends StatefulWidget {
   final AuthController controller;
@@ -45,7 +46,16 @@ class _HomeTabState extends State<HomeTab> {
       builder: (context, child) {
         return Column(
           children: [
-            const HomeHeader(),
+            HomeHeader(
+              onSearchTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchHistoryScreen(),
+                  ),
+                );
+              },
+            ),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () async => _controller.loadAllData(),
