@@ -33,7 +33,7 @@ class CartController extends ChangeNotifier {
     return _updatingItemIds.contains(cartItemId);
   }
 
-  Future<void> loadCart() async {
+  Future<void> loadCart({bool showLoading = true}) async {
     if (!hasValidUser) {
       _items = const <CartItemModel>[];
       _errorMessage = 'Không xác định được người dùng.';
@@ -41,7 +41,9 @@ class CartController extends ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
+    if (showLoading) {
+      _isLoading = true;
+    }
     _errorMessage = null;
     notifyListeners();
 
@@ -50,7 +52,9 @@ class CartController extends ChangeNotifier {
     } catch (_) {
       _errorMessage = 'Không thể tải giỏ hàng.';
     } finally {
-      _isLoading = false;
+      if (showLoading) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
@@ -65,7 +69,7 @@ class CartController extends ChangeNotifier {
       productId: productId,
       quantity: quantity,
     );
-    await loadCart();
+    await loadCart(showLoading: false);
   }
 
   Future<void> updateQuantity({
@@ -85,7 +89,7 @@ class CartController extends ChangeNotifier {
         cartItemId: cartItemId,
         quantity: quantity,
       );
-      await loadCart();
+      await loadCart(showLoading: false);
     } finally {
       _updatingItemIds.remove(cartItemId);
       notifyListeners();
@@ -98,7 +102,7 @@ class CartController extends ChangeNotifier {
 
     try {
       await _cartService.removeItem(cartItemId);
-      await loadCart();
+      await loadCart(showLoading: false);
     } finally {
       _updatingItemIds.remove(cartItemId);
       notifyListeners();
@@ -115,7 +119,7 @@ class CartController extends ChangeNotifier {
 
     try {
       await _cartService.clearCart(userId!);
-      await loadCart();
+      await loadCart(showLoading: false);
     } finally {
       _isClearing = false;
       notifyListeners();
