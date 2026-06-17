@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_card.dart';
 import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.dart';
 
 class ProductSection extends StatelessWidget {
   final bool isDark;
   final List<ProductModel> products;
-  final int? userId;
+  final CartController cartController;
   final bool isLoadingProducts;
   final bool isLoadingMore;
   final VoidCallback onRetry;
@@ -16,7 +17,7 @@ class ProductSection extends StatelessWidget {
     super.key,
     required this.isDark,
     required this.products,
-    required this.userId,
+    required this.cartController,
     required this.isLoadingMore,
     required this.isLoadingProducts,
     required this.onRetry,
@@ -85,7 +86,7 @@ class ProductSection extends StatelessWidget {
                       MaterialPageRoute<void>(
                         builder: (_) => ProductDetailScreen(
                           productId: product.id,
-                          userId: userId,
+                          cartController: cartController,
                         ),
                       ),
                     );

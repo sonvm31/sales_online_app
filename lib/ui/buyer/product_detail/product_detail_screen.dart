@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
-import 'package:sales_online_app/data/services/cart_service.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
-  final int? userId;
+  final CartController? cartController;
   final ProductService? productService;
-  final CartService? cartService;
 
   const ProductDetailScreen({
     super.key,
     required this.productId,
-    this.userId,
+    this.cartController,
     this.productService,
-    this.cartService,
   });
 
   @override
@@ -24,7 +22,6 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late final ProductService _productService;
-  late final CartService _cartService;
   late Future<ProductModel> _productFuture;
   bool _isAddingToCart = false;
 
@@ -32,7 +29,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     _productService = widget.productService ?? ProductService();
-    _cartService = widget.cartService ?? CartService();
     _loadProduct();
   }
 
@@ -45,8 +41,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _addToCart(ProductModel product) async {
-    final userId = widget.userId;
-    if (userId == null || userId <= 0) {
+    final cartController = widget.cartController;
+    if (cartController == null || !cartController.hasValidUser) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Không xác định được người dùng.')),
       );
@@ -62,14 +58,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     setState(() => _isAddingToCart = true);
     try {
-      await _cartService.addToCart(
-        userId: userId,
-        productId: product.id,
-        quantity: 1,
-      );
+      await cartController.addToCart(productId: product.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Thêm vào giỏ hàng thành công')),
+        SnackBar(
+          content: const Text('Thêm vào giỏ hàng thành công'),
+          backgroundColor: Colors.green.shade600,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     } catch (_) {
       if (!mounted) return;

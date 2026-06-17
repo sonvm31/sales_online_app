@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/controller/home_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/category_section.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/home_header.dart';
@@ -8,8 +9,13 @@ import 'package:sales_online_app/ui/buyer/home/widgets/product_section.dart';
 
 class HomeTab extends StatefulWidget {
   final AuthController controller;
+  final CartController cartController;
 
-  const HomeTab({super.key, required this.controller});
+  const HomeTab({
+    super.key,
+    required this.controller,
+    required this.cartController,
+  });
 
   @override
   State<HomeTab> createState() => _HomeTabState();
@@ -63,7 +69,7 @@ class _HomeTabState extends State<HomeTab> {
                       ProductSection(
                         isDark: isDark,
                         products: _controller.products,
-                        userId: widget.controller.session?.userId,
+                        cartController: widget.cartController,
                         isLoadingMore: _controller.isLoadingMore,
                         isLoadingProducts: _controller.isLoadingProducts,
                         onRetry: _controller.fetchInitProducts,

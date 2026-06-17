@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/cart/cart_screen.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
 import 'package:sales_online_app/ui/shared/temp_screen.dart';
-import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/shared/profile_screen.dart';
 
 class MainWrapperScreen extends StatefulWidget {
@@ -16,14 +17,28 @@ class MainWrapperScreen extends StatefulWidget {
 }
 
 class _MainWrapperScreen extends State<MainWrapperScreen> {
+  late final CartController _cartController;
   int _currIndex = 0;
 
   List<Widget> get _tabs => [
-    HomeTab(controller: widget.controller),
-    CartScreen(userId: widget.controller.session?.userId),
+    HomeTab(controller: widget.controller, cartController: _cartController),
+    CartScreen(controller: _cartController),
     const PlaceholderScreen(title: "Màn hình Tin nhắn"),
     ProfileScreen(controller: widget.controller), // Truyền controller vào đây
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _cartController = CartController(userId: widget.controller.session?.userId);
+    _cartController.loadCart();
+  }
+
+  @override
+  void dispose() {
+    _cartController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +72,12 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
             label: "Trang chủ",
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.shopping_cart),
+            icon: ListenableBuilder(
+              listenable: _cartController,
+              builder: (context, child) {
+                return _CartNavIcon(count: _cartController.itemCount);
+              },
+            ),
             label: 'Giỏ hàng',
           ),
           BottomNavigationBarItem(
@@ -70,6 +90,27 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CartNavIcon extends StatelessWidget {
+  final int count;
+
+  const _CartNavIcon({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    const icon = Icon(CupertinoIcons.shopping_cart);
+
+    if (count <= 0) {
+      return icon;
+    }
+
+    return Badge(
+      label: Text(count > 99 ? '99+' : '$count'),
+      backgroundColor: Colors.red,
+      child: icon,
     );
   }
 }

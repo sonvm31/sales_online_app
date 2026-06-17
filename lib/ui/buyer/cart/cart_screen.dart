@@ -1,89 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
-import 'package:sales_online_app/data/services/cart_service.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 
-class CartScreen extends StatefulWidget {
-  final int? userId;
-  final CartService? cartService;
+class CartScreen extends StatelessWidget {
+  final CartController controller;
 
-  const CartScreen({super.key, required this.userId, this.cartService});
+  const CartScreen({super.key, required this.controller});
 
-  @override
-  State<CartScreen> createState() => _CartScreenState();
-}
-
-class _CartScreenState extends State<CartScreen> {
-  late final CartService _cartService;
-  late Future<List<CartItemModel>> _cartFuture;
-  final Set<int> _updatingItemIds = <int>{};
-  bool _isClearing = false;
-
-  bool get _hasValidUser => widget.userId != null && widget.userId! > 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _cartService = widget.cartService ?? CartService();
-    _loadCart();
-  }
-
-  @override
-  void didUpdateWidget(covariant CartScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.userId != widget.userId) {
-      _loadCart();
-    }
-  }
-
-  void _loadCart() {
-    _cartFuture = _hasValidUser
-        ? _cartService.fetchCart(widget.userId!)
-        : Future<List<CartItemModel>>.value(const <CartItemModel>[]);
-  }
-
-  void _refreshCart() {
-    setState(_loadCart);
-  }
-
-  Future<void> _updateQuantity(CartItemModel item, int nextQuantity) async {
-    if (nextQuantity < 1) {
-      await _removeItem(item);
-      return;
-    }
-
-    setState(() => _updatingItemIds.add(item.id));
-    try {
-      await _cartService.updateQuantity(
-        cartItemId: item.id,
-        quantity: nextQuantity,
-      );
-      _refreshCart();
-    } catch (_) {
-      _showSnackBar('Không thể cập nhật số lượng.');
-    } finally {
-      if (mounted) {
-        setState(() => _updatingItemIds.remove(item.id));
-      }
-    }
-  }
-
-  Future<void> _removeItem(CartItemModel item) async {
-    setState(() => _updatingItemIds.add(item.id));
-    try {
-      await _cartService.removeItem(item.id);
-      _showSnackBar('Đã xóa sản phẩm khỏi giỏ hàng.');
-      _refreshCart();
-    } catch (_) {
-      _showSnackBar('Không thể xóa sản phẩm.');
-    } finally {
-      if (mounted) {
-        setState(() => _updatingItemIds.remove(item.id));
-      }
-    }
-  }
-
-  Future<void> _clearCart() async {
+  Future<void> _clearCart(BuildContext context) async {
     final shouldClear = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -105,24 +30,46 @@ class _CartScreenState extends State<CartScreen> {
       },
     );
 
-    if (shouldClear != true || !_hasValidUser) return;
+    if (shouldClear != true) return;
 
-    setState(() => _isClearing = true);
     try {
-      await _cartService.clearCart(widget.userId!);
-      _showSnackBar('Đã xóa giỏ hàng.');
-      _refreshCart();
+      await controller.clearCart();
+      if (!context.mounted) return;
+      _showSnackBar(context, 'Đã xóa giỏ hàng.');
     } catch (_) {
-      _showSnackBar('Không thể xóa giỏ hàng.');
-    } finally {
-      if (mounted) {
-        setState(() => _isClearing = false);
-      }
+      if (!context.mounted) return;
+      _showSnackBar(context, 'Không thể xóa giỏ hàng.');
     }
   }
 
-  void _showSnackBar(String message) {
-    if (!mounted) return;
+  Future<void> _updateQuantity(
+    BuildContext context,
+    CartItemModel item,
+    int nextQuantity,
+  ) async {
+    try {
+      await controller.updateQuantity(
+        cartItemId: item.id,
+        quantity: nextQuantity,
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      _showSnackBar(context, 'Không thể cập nhật số lượng.');
+    }
+  }
+
+  Future<void> _removeItem(BuildContext context, CartItemModel item) async {
+    try {
+      await controller.removeItem(item.id);
+      if (!context.mounted) return;
+      _showSnackBar(context, 'Đã xóa sản phẩm khỏi giỏ hàng.');
+    } catch (_) {
+      if (!context.mounted) return;
+      _showSnackBar(context, 'Không thể xóa sản phẩm.');
+    }
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
@@ -146,74 +93,70 @@ class _CartScreenState extends State<CartScreen> {
         actions: [
           IconButton(
             tooltip: 'Tải lại',
-            onPressed: _refreshCart,
+            onPressed: controller.loadCart,
             icon: const Icon(Icons.refresh),
           ),
         ],
       ),
-      body: !_hasValidUser
-          ? const _CartMessage(
+      body: ListenableBuilder(
+        listenable: controller,
+        builder: (context, child) {
+          if (!controller.hasValidUser) {
+            return const _CartMessage(
               icon: Icons.person_off_outlined,
               title: 'Không xác định được người dùng',
               message: 'Vui lòng đăng nhập lại để xem giỏ hàng.',
-            )
-          : FutureBuilder<List<CartItemModel>>(
-              future: _cartFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  );
-                }
+            );
+          }
 
-                if (snapshot.hasError) {
-                  return _CartErrorState(onRetry: _refreshCart);
-                }
+          if (controller.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
+          }
 
-                final items = snapshot.data ?? const <CartItemModel>[];
-                if (items.isEmpty) {
-                  return const _CartMessage(
-                    icon: Icons.shopping_cart_outlined,
-                    title: 'Giỏ hàng đang trống',
-                    message: 'Hãy thêm sản phẩm bạn muốn mua vào giỏ hàng.',
-                  );
-                }
+          if (controller.errorMessage != null) {
+            return _CartErrorState(onRetry: controller.loadCart);
+          }
 
-                final total = items.fold<double>(
-                  0,
-                  (sum, item) => sum + item.totalPrice,
-                );
+          if (controller.items.isEmpty) {
+            return const _CartMessage(
+              icon: Icons.shopping_cart_outlined,
+              title: 'Giỏ hàng đang trống',
+              message: 'Hãy thêm sản phẩm bạn muốn mua vào giỏ hàng.',
+            );
+          }
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.separated(
-                        padding: EdgeInsets.all(AppSpacing.md),
-                        itemCount: items.length,
-                        separatorBuilder: (_, _) => AppSpacing.h16,
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return _CartItemTile(
-                            item: item,
-                            isUpdating: _updatingItemIds.contains(item.id),
-                            onDecrease: () =>
-                                _updateQuantity(item, item.quantity - 1),
-                            onIncrease: () =>
-                                _updateQuantity(item, item.quantity + 1),
-                            onRemove: () => _removeItem(item),
-                          );
-                        },
-                      ),
-                    ),
-                    _CartSummary(
-                      total: total,
-                      isClearing: _isClearing,
-                      onClearCart: _clearCart,
-                    ),
-                  ],
-                );
-              },
-            ),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  itemCount: controller.items.length,
+                  separatorBuilder: (_, _) => AppSpacing.h16,
+                  itemBuilder: (context, index) {
+                    final item = controller.items[index];
+                    return _CartItemTile(
+                      item: item,
+                      isUpdating: controller.isUpdating(item.id),
+                      onDecrease: () =>
+                          _updateQuantity(context, item, item.quantity - 1),
+                      onIncrease: () =>
+                          _updateQuantity(context, item, item.quantity + 1),
+                      onRemove: () => _removeItem(context, item),
+                    );
+                  },
+                ),
+              ),
+              _CartSummary(
+                total: controller.totalPrice,
+                isClearing: controller.isClearing,
+                onClearCart: () => _clearCart(context),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
