@@ -18,12 +18,13 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
   Timer? _verificationTimer;
   bool _isChecking = false;
   bool _isResending = false;
+  bool _isPolling = false;
 
   @override
   void initState() {
     super.initState();
     _verificationTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      _checkVerification();
+      _checkVerification(showLoading: false);
     });
   }
 
@@ -33,10 +34,14 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
     super.dispose();
   }
 
-  Future<void> _checkVerification() async {
-    if (_isChecking) return;
+  Future<void> _checkVerification({bool showLoading = true}) async {
+    if (_isChecking || _isPolling) return;
 
-    setState(() => _isChecking = true);
+    if (showLoading) {
+      setState(() => _isChecking = true);
+    } else {
+      _isPolling = true;
+    }
     try {
       final user = FirebaseAuth.instance.currentUser;
       await user?.reload();
@@ -56,9 +61,10 @@ class _CheckEmailScreenState extends State<CheckEmailScreen> {
         );
       }
     } finally {
-      if (mounted) {
+      if (showLoading && mounted) {
         setState(() => _isChecking = false);
       }
+      _isPolling = false;
     }
   }
 
