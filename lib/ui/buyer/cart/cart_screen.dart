@@ -143,19 +143,44 @@ class _CartScreenState extends State<CartScreen> {
 
               return Padding(
                 padding: EdgeInsets.only(right: AppSpacing.sm),
-                child: TextButton.icon(
-                  onPressed: controller.isClearing
-                      ? null
-                      : () => _clearCart(context),
-                  icon: controller.isClearing
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.delete_sweep_outlined, size: 18),
-                  label: const Text('Xóa giỏ hàng'),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isNarrow = MediaQuery.sizeOf(context).width < 360;
+
+                    if (isNarrow) {
+                      return IconButton(
+                        tooltip: 'Xóa giỏ hàng',
+                        onPressed: controller.isClearing
+                            ? null
+                            : () => _clearCart(context),
+                        icon: controller.isClearing
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(Icons.delete_sweep_outlined),
+                        color: Colors.red,
+                      );
+                    }
+
+                    return TextButton.icon(
+                      onPressed: controller.isClearing
+                          ? null
+                          : () => _clearCart(context),
+                      icon: controller.isClearing
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.delete_sweep_outlined, size: 18),
+                      label: const Text('Xóa giỏ hàng'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    );
+                  },
                 ),
               );
             },
@@ -282,110 +307,130 @@ class _CartItemTile extends StatelessWidget {
         : AppColors.textMutedLight;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
 
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: AppRadius.xLarge,
-        border: Border.all(color: borderColor.withValues(alpha: 0.65)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.storefront_outlined, size: 18, color: mutedColor),
-              AppSpacing.w8,
-              Expanded(
-                child: Text(
-                  item.product.shopName,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isNarrow = constraints.maxWidth < 340;
+        final imageSize = isNarrow ? 68.0 : 82.0;
+        final horizontalGap = isNarrow ? AppSpacing.sm : AppSpacing.md;
+
+        return Container(
+          padding: EdgeInsets.all(isNarrow ? AppSpacing.sm : AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: AppRadius.xLarge,
+            border: Border.all(color: borderColor.withValues(alpha: 0.65)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          AppSpacing.h16,
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Checkbox(
-                value: isSelected,
-                onChanged: isUpdating ? null : onSelectedChanged,
-                activeColor: AppColors.primary,
-                visualDensity: VisualDensity.compact,
-              ),
-              AppSpacing.w8,
-              _CartProductImage(imageUrl: item.product.imageUrl),
-              AppSpacing.w16,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.product.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    AppSpacing.h8,
-                    Text(
-                      _formatPrice(item.product.price),
+              Row(
+                children: [
+                  Icon(Icons.storefront_outlined, size: 18, color: mutedColor),
+                  AppSpacing.w8,
+                  Expanded(
+                    child: Text(
+                      item.product.shopName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.primary,
+                        color: textColor,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
-                    AppSpacing.h16,
-                    _QuantityStepper(
-                      quantity: item.quantity,
-                      isUpdating: isUpdating,
-                      textColor: textColor,
-                      onDecrease: onDecrease,
-                      onIncrease: onIncrease,
+                  ),
+                  IconButton.filledTonal(
+                    tooltip: 'Xóa',
+                    onPressed: isUpdating ? null : onRemove,
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.red.withValues(alpha: 0.08),
+                      foregroundColor: Colors.red,
+                      minimumSize: const Size(36, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.medium,
+                      ),
                     ),
-                  ],
-                ),
+                    icon: const Icon(Icons.delete_outline, size: 19),
+                  ),
+                ],
               ),
-              AppSpacing.w8,
-              IconButton.filledTonal(
-                tooltip: 'Xóa',
-                onPressed: isUpdating ? null : onRemove,
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.red.withValues(alpha: 0.08),
-                  foregroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
-                ),
-                icon: const Icon(Icons.delete_outline, size: 20),
+              AppSpacing.h16,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 28,
+                    child: Checkbox(
+                      value: isSelected,
+                      onChanged: isUpdating ? null : onSelectedChanged,
+                      activeColor: AppColors.primary,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ),
+                  SizedBox(width: isNarrow ? 6 : AppSpacing.sm),
+                  _CartProductImage(
+                    imageUrl: item.product.imageUrl,
+                    size: imageSize,
+                  ),
+                  SizedBox(width: horizontalGap),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.product.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        AppSpacing.h8,
+                        Text(
+                          _formatPrice(item.product.price),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        AppSpacing.h16,
+                        _QuantityStepper(
+                          quantity: item.quantity,
+                          isUpdating: isUpdating,
+                          isCompact: isNarrow,
+                          textColor: textColor,
+                          onDecrease: onDecrease,
+                          onIncrease: onIncrease,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
 class _CartProductImage extends StatelessWidget {
   final String imageUrl;
+  final double size;
 
-  const _CartProductImage({required this.imageUrl});
+  const _CartProductImage({required this.imageUrl, required this.size});
 
   @override
   Widget build(BuildContext context) {
@@ -396,8 +441,8 @@ class _CartProductImage extends StatelessWidget {
     return ClipRRect(
       borderRadius: AppRadius.large,
       child: SizedBox(
-        width: 88,
-        height: 88,
+        width: size,
+        height: size,
         child: imageUrl.isEmpty
             ? ColoredBox(
                 color: placeholderColor,
@@ -419,6 +464,7 @@ class _CartProductImage extends StatelessWidget {
 class _QuantityStepper extends StatelessWidget {
   final int quantity;
   final bool isUpdating;
+  final bool isCompact;
   final Color textColor;
   final VoidCallback onDecrease;
   final VoidCallback onIncrease;
@@ -426,6 +472,7 @@ class _QuantityStepper extends StatelessWidget {
   const _QuantityStepper({
     required this.quantity,
     required this.isUpdating,
+    required this.isCompact,
     required this.textColor,
     required this.onDecrease,
     required this.onIncrease,
@@ -435,10 +482,11 @@ class _QuantityStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isDark ? AppColors.borderDark : AppColors.borderLight;
+    final stepperWidth = isCompact ? 104.0 : 116.0;
 
     return Container(
-      width: 116,
-      height: 36,
+      width: stepperWidth,
+      height: 34,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: AppRadius.circular,
@@ -488,11 +536,11 @@ class _StepperButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 36,
-      height: 36,
+      width: 34,
+      height: 34,
       child: IconButton(
         onPressed: onPressed,
-        icon: Icon(icon, size: 17),
+        icon: Icon(icon, size: 16),
         padding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
       ),
@@ -534,79 +582,93 @@ class _CartSummary extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isNarrow = constraints.maxWidth < 340;
+            final buttonWidth = isNarrow ? 132.0 : 150.0;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Checkbox(
-                  value: isAllSelected,
-                  onChanged: onSelectAllChanged,
-                  activeColor: AppColors.primary,
-                  visualDensity: VisualDensity.compact,
-                ),
-                Text(
-                  'Chọn tất cả',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: mutedColor,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            AppSpacing.h8,
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tổng thanh toán',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: mutedColor,
-                        ),
-                      ),
-                      AppSpacing.h4,
-                      Text(
-                        _formatPrice(total),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: isAllSelected,
+                      onChanged: onSelectAllChanged,
+                      activeColor: AppColors.primary,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Chọn tất cả',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.headingMedium.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w800,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: mutedColor,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  width: 150,
-                  height: 54,
-                  child: FilledButton(
-                    onPressed: selectedCount == 0 ? null : () {},
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: const Color(0xFFD3D8E2),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: AppRadius.xLarge,
+                AppSpacing.h8,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tổng thanh toán',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: mutedColor,
+                            ),
+                          ),
+                          AppSpacing.h4,
+                          Text(
+                            _formatPrice(total),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.headingMedium.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text(
-                      selectedCount == 0
-                          ? 'Mua hàng'
-                          : 'Mua hàng ($selectedCount)',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.button.copyWith(color: Colors.white),
+                    SizedBox(
+                      width: buttonWidth,
+                      height: 54,
+                      child: FilledButton(
+                        onPressed: selectedCount == 0 ? null : () {},
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          disabledBackgroundColor: const Color(0xFFD3D8E2),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppRadius.xLarge,
+                          ),
+                        ),
+                        child: Text(
+                          selectedCount == 0
+                              ? 'Mua hàng'
+                              : 'Mua hàng ($selectedCount)',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyles.button.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
