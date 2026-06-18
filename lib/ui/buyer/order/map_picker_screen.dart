@@ -313,15 +313,31 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      _addressText ?? "Đang xác định vị trí...",
-                      style: AppTextStyles.headingMedium.copyWith(
-                        color: isDark
-                            ? AppColors.textLight
-                            : AppColors.textDark,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    _isReverseLoading
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Text(
+                            _addressText ?? "Đang xác định vị trí...",
+                            style: AppTextStyles.headingMedium.copyWith(
+                              color: isDark
+                                  ? AppColors.textLight
+                                  : AppColors.textDark,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                     SizedBox(height: AppSpacing.md),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context, {
