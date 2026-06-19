@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/buyer/order_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/vnpay_payment_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderButtonBar extends StatelessWidget {
   final bool isDark;
@@ -33,27 +35,51 @@ class OrderButtonBar extends StatelessWidget {
     }
 
     if (controller.selectedPaymentMethod == "VNPAY" && orderResult.isNotEmpty) {
-      final bool? isPaidSuccess = await navigator.push<bool>(
-        MaterialPageRoute(
-          builder: (context) => VNPayPaymentScreen(paymentUrl: orderResult),
-        ),
-      );
+      if (kIsWeb) {
+        final Uri vnpayUri = Uri.parse(orderResult);
+        if (await canLaunchUrl(vnpayUri)) {
+          await launchUrl(vnpayUri, mode: LaunchMode.externalApplication);
 
-      if (isPaidSuccess == true) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán VNPay thành công!"),
-            backgroundColor: Colors.green,
-          ),
-        );
-        navigator.pop("order_success");
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Đang mở trang thanh toán VNPAY trên Tab mới của trình duyệt...",
+              ),
+              backgroundColor: Colors.blue,
+            ),
+          );
+          navigator.pop("order_success");
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text("Không thể mở liên kết thanh toán VNPay."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } else {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán thất bại hoặc đơn đã bị hủy."),
-            backgroundColor: Colors.orange,
+        final bool? isPaidSuccess = await navigator.push<bool>(
+          MaterialPageRoute(
+            builder: (context) => VNPayPaymentScreen(paymentUrl: orderResult),
           ),
         );
+
+        if (isPaidSuccess == true) {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text("Thanh toán VNPay thành công!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+          navigator.pop("order_success");
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text("Thanh toán thất bại hoặc đơn đã bị hủy."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
     } else {
       messenger.showSnackBar(

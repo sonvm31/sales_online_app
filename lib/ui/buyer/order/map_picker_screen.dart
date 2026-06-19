@@ -16,6 +16,7 @@ class MapPickerScreen extends StatefulWidget {
 class _MapPickerScreenState extends State<MapPickerScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _houseNumberController = TextEditingController();
 
   final LatLng _initCenter = const LatLng(10.8412, 106.8099);
   late LatLng _currCenter;
@@ -131,6 +132,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _houseNumberController.dispose();
     _mapController.dispose();
     super.dispose();
   }
@@ -339,12 +341,86 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                             textAlign: TextAlign.center,
                           ),
                     SizedBox(height: AppSpacing.md),
+                    Text(
+                      "Số nhà, tòa nhà, ngõ hẻm (nếu có):",
+                      style: AppTextStyles.caption.copyWith(
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: AppSpacing.xs),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.black26 : Colors.grey.shade100,
+                        borderRadius: AppRadius.medium,
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
+                        ),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      child: TextField(
+                        controller: _houseNumberController,
+                        decoration: const InputDecoration(
+                          hintText: "Ví dụ: Số 123/4G, Chung cư Blue Sky...",
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ),
+
+                    SizedBox(height: AppSpacing.md),
                     ElevatedButton(
-                      onPressed: () => Navigator.pop(context, {
-                        'address': _addressText,
-                        'lat': _currCenter.latitude,
-                        'lng': _currCenter.longitude,
-                      }),
+                      onPressed: _isReverseLoading || _addressText == null
+                          ? null
+                          : () {
+                              String finalAddress = _addressText!;
+                              String houseDetail = _houseNumberController.text
+                                  .trim();
+
+                              if (houseDetail.isNotEmpty) {
+                                String rawAddressLower = finalAddress.toLowerCase();
+                                String houseDetailLower = houseDetail.toLowerCase();
+                                List<String> addressParts = houseDetail.split(',');
+
+                                List<String> cleanParts = [];
+                                for (var part in addressParts) {
+                                  String trimmedPart = part.trim();
+                                  if (trimmedPart.isEmpty) continue;
+
+                                  String partLower = trimmedPart.toLowerCase();
+
+
+                                  String cleanPartLower = partLower
+                                      .replaceAll(RegExp(r'^(đường|duong|đ|d)\s+'), '')
+                                      .trim();
+
+                                  if (rawAddressLower.contains(partLower) ||
+                                      rawAddressLower.contains(cleanPartLower)) {
+                                    continue;
+                                  }
+
+
+                                  cleanParts.add(trimmedPart);
+                                }
+
+
+                                if (cleanParts.isNotEmpty) {
+                                  String cleanHouseDetail = cleanParts.join(', ');
+                                  finalAddress = "$cleanHouseDetail, $_addressText";
+                                }
+                              }
+                              Navigator.pop(context, {
+                                'address': finalAddress,
+                                'lat': _currCenter.latitude,
+                                'lng': _currCenter.longitude,
+                              });
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
