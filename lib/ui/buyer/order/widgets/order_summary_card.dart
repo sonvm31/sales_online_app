@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 
@@ -32,7 +33,7 @@ class OrderSummaryCard extends StatelessWidget {
             "Sản phẩm đã chọn:",
             style: AppTextStyles.headingMedium.copyWith(
               color: isDark ? AppColors.textLight : AppColors.textDark,
-              fontSize: 16.0,
+              fontSize: 16.0.sp,
             ),
           ),
           Divider(
@@ -45,12 +46,19 @@ class OrderSummaryCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "${item.quantity}x ${item.product.name}",
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: isDark ? AppColors.textLight : AppColors.textDark,
+                  Expanded(
+                    child: Text(
+                      "${item.quantity}x ${item.product.name}",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: isDark
+                            ? AppColors.textLight
+                            : AppColors.textDark,
+                      ),
                     ),
                   ),
+                  AppSpacing.h4,
                   Text(
                     "${item.totalPrice.toStringAsFixed(0)}đ",
                     style: AppTextStyles.bodyLarge.copyWith(
@@ -68,12 +76,15 @@ class OrderSummaryCard extends StatelessWidget {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Tổng tiền hàng:",
-                style: AppTextStyles.headingMedium.copyWith(
-                  color: isDark ? AppColors.textLight : AppColors.textDark,
-                  fontSize: 16.0,
+              Expanded(
+                child: Text(
+                  "Tổng tiền hàng:",
+                  style: AppTextStyles.headingMedium.copyWith(
+                    color: isDark ? AppColors.textLight : AppColors.textDark,
+                    fontSize: 16.0.sp,
+                  ),
                 ),
               ),
               Text(

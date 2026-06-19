@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/ui/buyer/order/map_picker_screen.dart';
 
@@ -52,7 +53,7 @@ class AddressCard extends StatelessWidget {
             Icon(
               Icons.location_on_rounded,
               color: hasAddress ? AppColors.primary : Colors.orange,
-              size: 20,
+              size: 20.sp,
             ),
             AppSpacing.w8,
             Text(
@@ -62,37 +63,55 @@ class AddressCard extends StatelessWidget {
               ),
             ),
             AppSpacing.h8,
-            Row(
-              children: [
-                Icon(
-                  Icons.person_outline_rounded,
-                  color: isDark
-                      ? AppColors.textMutedDark
-                      : AppColors.textMutedLight,
-                  size: 18,
-                ),
-                SizedBox(width: AppSpacing.xs),
-                Text(
-                  userName.isNotEmpty ? userName : "Chưa cập nhật tên",
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  "  |  ",
-                  style: TextStyle(
-                    color: isDark ? Colors.white30 : Colors.black26,
-                  ),
-                ),
-                Text(
-                  userPhone.isNotEmpty ? userPhone : "Chưa có SĐT",
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: isDark
-                        ? AppColors.textMutedDark
-                        : AppColors.textMutedLight,
-                  ),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.xs,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            color: isDark
+                                ? AppColors.textMutedDark
+                                : AppColors.textMutedLight,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: AppSpacing.xs),
+                          Flexible(
+                            child: Text(
+                              userName.isNotEmpty ? userName : "Chưa cập nhật tên",
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "  |  ",
+                            style: TextStyle(
+                              color: isDark ? Colors.white30 : Colors.black26,
+                            ),
+                          ),
+                    Text(
+                      userPhone.isNotEmpty ? userPhone : "Chưa có SĐT",
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: isDark
+                            ? AppColors.textMutedDark
+                            : AppColors.textMutedLight,
+                      ),
+                    ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             AppSpacing.h8,
             Text(
