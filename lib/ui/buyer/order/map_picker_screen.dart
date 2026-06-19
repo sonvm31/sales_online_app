@@ -385,7 +385,6 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
 
                               if (houseDetail.isNotEmpty) {
                                 String rawAddressLower = finalAddress.toLowerCase();
-                                String houseDetailLower = houseDetail.toLowerCase();
                                 List<String> addressParts = houseDetail.split(',');
 
                                 List<String> cleanParts = [];
