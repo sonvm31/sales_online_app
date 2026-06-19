@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
-import 'package:sales_online_app/ui/buyer/home/controller/home_controller.dart';
+import 'package:sales_online_app/logic/buyer/home_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/category_section.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/home_header.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_section.dart';

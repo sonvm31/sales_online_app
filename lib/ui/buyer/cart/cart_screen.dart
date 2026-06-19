@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
+import 'package:sales_online_app/ui/buyer/order/order_screen.dart';
 
 class CartScreen extends StatefulWidget {
   final CartController controller;
@@ -270,6 +271,31 @@ class _CartScreenState extends State<CartScreen> {
                 isAllSelected: isAllSelected,
                 onSelectAllChanged: (value) =>
                     _toggleSelectAll(controller.items, value),
+                onOrder: () async {
+                  final purchasedItemIds = selectedItems
+                      .map((e) => e.id)
+                      .toList();
+                  final dynamic orderResult = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          OrderScreen(selectedCartItems: selectedItems),
+                    ),
+                  );
+                  if (context.mounted) {
+                    if (orderResult == "order_success" || orderResult == true) {
+                      try {
+                        for (final itemId in purchasedItemIds) {
+                          await controller.removeItem(itemId);
+                        }
+                        _selectedItemIds.clear();
+                        controller.loadCart();
+                      } catch (e) {
+                        debugPrint("Lỗi dọn dẹp giỏ hàng sau mua: $e");
+                      }
+                    }
+                  }
+                },
               ),
             ],
           );
@@ -553,12 +579,14 @@ class _CartSummary extends StatelessWidget {
   final int selectedCount;
   final bool isAllSelected;
   final ValueChanged<bool?> onSelectAllChanged;
+  final VoidCallback onOrder;
 
   const _CartSummary({
     required this.total,
     required this.selectedCount,
     required this.isAllSelected,
     required this.onSelectAllChanged,
+    required this.onOrder,
   });
 
   @override
@@ -582,93 +610,79 @@ class _CartSummary extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isNarrow = constraints.maxWidth < 340;
-            final buttonWidth = isNarrow ? 132.0 : 150.0;
-
-            return Column(
-              mainAxisSize: MainAxisSize.min,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
               children: [
-                Row(
-                  children: [
-                    Checkbox(
-                      value: isAllSelected,
-                      onChanged: onSelectAllChanged,
-                      activeColor: AppColors.primary,
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Chọn tất cả',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: mutedColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
+                Checkbox(
+                  value: isAllSelected,
+                  onChanged: onSelectAllChanged,
+                  activeColor: AppColors.primary,
+                  visualDensity: VisualDensity.compact,
                 ),
-                AppSpacing.h8,
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tổng thanh toán',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: mutedColor,
-                            ),
-                          ),
-                          AppSpacing.h4,
-                          Text(
-                            _formatPrice(total),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.headingMedium.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: buttonWidth,
-                      height: 54,
-                      child: FilledButton(
-                        onPressed: selectedCount == 0 ? null : () {},
-                        style: FilledButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          disabledBackgroundColor: const Color(0xFFD3D8E2),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: AppRadius.xLarge,
-                          ),
-                        ),
-                        child: Text(
-                          selectedCount == 0
-                              ? 'Mua hàng'
-                              : 'Mua hàng ($selectedCount)',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.button.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Chọn tất cả',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: mutedColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
-            );
-          },
+            ),
+            AppSpacing.h8,
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tổng thanh toán',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: mutedColor,
+                        ),
+                      ),
+                      AppSpacing.h4,
+                      Text(
+                        _formatPrice(total),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.headingMedium.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 150,
+                  height: 54,
+                  child: FilledButton(
+                    onPressed: selectedCount == 0 ? null : onOrder,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: const Color(0xFFD3D8E2),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppRadius.xLarge,
+                      ),
+                    ),
+                    child: Text(
+                      selectedCount == 0
+                          ? 'Mua hàng'
+                          : 'Mua hàng ($selectedCount)',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.button.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

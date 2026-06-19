@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
-import 'package:sales_online_app/ui/buyer/search/controller/search_result_controller.dart';
+import 'package:sales_online_app/logic/buyer/search_result_controller.dart';
 import 'package:sales_online_app/ui/buyer/search/widgets/filter_sort_bar.dart';
 import 'package:sales_online_app/ui/buyer/search/widgets/search_result_grid.dart';
 
