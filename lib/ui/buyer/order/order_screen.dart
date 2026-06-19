@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/logic/buyer/order_controller.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/ui/buyer/order/widgets/address_card.dart';
 import 'package:sales_online_app/ui/buyer/order/widgets/order_button_bar.dart';
@@ -10,8 +12,9 @@ import 'package:sales_online_app/ui/buyer/order/widgets/payment_method_card.dart
 
 class OrderScreen extends StatefulWidget {
   final List<CartItemModel> selectedCartItems;
+  final CartController cartController;
 
-  const OrderScreen({super.key, required this.selectedCartItems});
+  const OrderScreen({super.key, required this.selectedCartItems, required this.cartController});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -38,6 +41,8 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final user = FirebaseAuth.instance.currentUser;
 
     return ListenableBuilder(
       listenable: _controller,
@@ -74,6 +79,8 @@ class _OrderScreenState extends State<OrderScreen> {
                           children: [
                             AddressCard(
                               isDark: isDark,
+                              userName: user?.displayName ?? "Chưa cập nhật tên",
+                              userPhone: user?.phoneNumber ?? "Chưa cập nhật SĐT",
                               selectedAddress: _controller.selectedAddress,
                               onLocationPicked: (address, lat, lng) =>
                                   _controller.updateLocationInfo(
@@ -100,7 +107,7 @@ class _OrderScreenState extends State<OrderScreen> {
                         ),
                       ),
                     ),
-                    OrderButtonBar(isDark: isDark, controller: _controller),
+                    OrderButtonBar(isDark: isDark, controller: _controller, cartController: widget.cartController,),
                   ],
                 ),
         );

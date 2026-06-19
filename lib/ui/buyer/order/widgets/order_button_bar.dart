@@ -1,18 +1,23 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/buyer/order_controller.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/order_success_screen.dart';
 import 'package:sales_online_app/ui/buyer/order/vnpay_payment_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderButtonBar extends StatelessWidget {
   final bool isDark;
   final OrderController controller;
+  final CartController cartController;
 
   const OrderButtonBar({
     super.key,
     required this.isDark,
     required this.controller,
+    required this.cartController,
   });
 
   Future<void> _handleOrderProcessing(BuildContext context) async {
@@ -34,32 +39,60 @@ class OrderButtonBar extends StatelessWidget {
     }
 
     if (controller.selectedPaymentMethod == "VNPAY" && orderResult.isNotEmpty) {
-      final bool? isPaidSuccess = await navigator.push<bool>(
-        MaterialPageRoute(
-          builder: (context) => VNPayPaymentScreen(paymentUrl: orderResult),
-        ),
-      );
+      if (kIsWeb) {
+        final Uri vnpayUri = Uri.parse(orderResult);
+        if (await canLaunchUrl(vnpayUri)) {
+          await launchUrl(vnpayUri, mode: LaunchMode.externalApplication);
 
-      if (isPaidSuccess == true) {
-        await navigator.pushReplacement(
-          MaterialPageRoute<void>(
-            builder: (context) =>
-                OrderSuccessScreen(summary: controller.buildOrderSummary()),
-          ),
-        );
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text(
+                "Đang mở trang thanh toán VNPAY trên Tab mới của trình duyệt...",
+              ),
+              backgroundColor: Colors.blue,
+            ),
+          );
+          navigator.pop("order_success");
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text("Không thể mở liên kết thanh toán VNPay."),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       } else {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán thất bại hoặc đơn đã bị hủy."),
-            backgroundColor: Colors.orange,
+        final bool? isPaidSuccess = await navigator.push<bool>(
+          MaterialPageRoute(
+            builder: (context) => VNPayPaymentScreen(paymentUrl: orderResult),
           ),
         );
+
+        if (isPaidSuccess == true) {
+          await navigator.pushReplacement(
+            MaterialPageRoute<void>(
+              builder: (context) => OrderSuccessScreen(
+                summary: controller.buildOrderSummary(),
+                cartController: cartController,
+              ),
+            ),
+          );
+        } else {
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text("Thanh toán thất bại hoặc đơn đã bị hủy."),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
     } else {
       await navigator.pushReplacement(
         MaterialPageRoute<void>(
-          builder: (context) =>
-              OrderSuccessScreen(summary: controller.buildOrderSummary()),
+          builder: (context) => OrderSuccessScreen(
+            summary: controller.buildOrderSummary(),
+            cartController: cartController,
+          ),
         ),
       );
     }

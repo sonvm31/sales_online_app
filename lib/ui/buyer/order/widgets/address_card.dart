@@ -5,12 +5,16 @@ import 'package:sales_online_app/ui/buyer/order/map_picker_screen.dart';
 class AddressCard extends StatelessWidget {
   final bool isDark;
   final String selectedAddress;
+  final String userName;
+  final String userPhone;
   final Function(String address, double lat, double lng) onLocationPicked;
 
   const AddressCard({
     super.key,
     required this.isDark,
     required this.selectedAddress,
+    required this.userName,
+    required this.userPhone,
     required this.onLocationPicked,
   });
 
@@ -56,6 +60,39 @@ class AddressCard extends StatelessWidget {
               style: AppTextStyles.headingMedium.copyWith(
                 color: AppColors.primary,
               ),
+            ),
+            AppSpacing.h8,
+            Row(
+              children: [
+                Icon(
+                  Icons.person_outline_rounded,
+                  color: isDark
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight,
+                  size: 18,
+                ),
+                SizedBox(width: AppSpacing.xs),
+                Text(
+                  userName.isNotEmpty ? userName : "Chưa cập nhật tên",
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  "  |  ",
+                  style: TextStyle(
+                    color: isDark ? Colors.white30 : Colors.black26,
+                  ),
+                ),
+                Text(
+                  userPhone.isNotEmpty ? userPhone : "Chưa có SĐT",
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    color: isDark
+                        ? AppColors.textMutedDark
+                        : AppColors.textMutedLight,
+                  ),
+                ),
+              ],
             ),
             AppSpacing.h8,
             Text(
