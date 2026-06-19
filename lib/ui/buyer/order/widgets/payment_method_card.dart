@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class PaymentMethodCard extends StatelessWidget {
@@ -31,7 +32,7 @@ class PaymentMethodCard extends StatelessWidget {
             "Phương thức thanh toán:",
             style: AppTextStyles.headingMedium.copyWith(
               color: isDark ? AppColors.textLight : AppColors.textDark,
-              fontSize: 16.0,
+              fontSize: 16.0.sp,
             ),
           ),
           AppSpacing.h8,
