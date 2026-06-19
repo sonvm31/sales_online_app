@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/buyer/order_controller.dart';
+import 'package:sales_online_app/ui/buyer/order/order_success_screen.dart';
 import 'package:sales_online_app/ui/buyer/order/vnpay_payment_screen.dart';
 
 class OrderButtonBar extends StatelessWidget {
@@ -40,13 +41,12 @@ class OrderButtonBar extends StatelessWidget {
       );
 
       if (isPaidSuccess == true) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text("Thanh toán VNPay thành công!"),
-            backgroundColor: Colors.green,
+        await navigator.pushReplacement(
+          MaterialPageRoute<void>(
+            builder: (context) =>
+                OrderSuccessScreen(summary: controller.buildOrderSummary()),
           ),
         );
-        navigator.pop("order_success");
       } else {
         messenger.showSnackBar(
           const SnackBar(
@@ -56,14 +56,12 @@ class OrderButtonBar extends StatelessWidget {
         );
       }
     } else {
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text("Đặt hàng COD thành công! Đơn hàng đang được xử lý."),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
+      await navigator.pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (context) =>
+              OrderSuccessScreen(summary: controller.buildOrderSummary()),
         ),
       );
-      navigator.pop("order_success");
     }
   }
 

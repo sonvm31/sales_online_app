@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
+import 'package:sales_online_app/data/models/order_summary_model.dart';
 import 'package:sales_online_app/data/services/order_service.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 
@@ -83,15 +84,16 @@ class OrderController extends ChangeNotifier {
       if (response.statusCode == 200 || response.statusCode == 201) {
         dynamic responseData = response.data;
         if (responseData != null) {
-          if(responseData is Map){
-
-          lastCreatedOrderId = int.tryParse(responseData['id'].toString());
-          } else if(responseData is String){
+          if (responseData is Map) {
+            lastCreatedOrderId = int.tryParse(responseData['id'].toString());
+          } else if (responseData is String) {
             try {
               final Map<String, dynamic> parsedJson = jsonDecode(responseData);
               lastCreatedOrderId = int.tryParse(parsedJson['id'].toString());
             } catch (_) {
-              final match = RegExp(r'"id"\s*:\s*(\d+)').firstMatch(responseData);
+              final match = RegExp(
+                r'"id"\s*:\s*(\d+)',
+              ).firstMatch(responseData);
               if (match != null) {
                 lastCreatedOrderId = int.tryParse(match.group(1) ?? "");
               }
@@ -102,8 +104,10 @@ class OrderController extends ChangeNotifier {
             "Backend tạo đơn thành công nhưng không trả về ID đơn hàng hợp lệ.",
           );
         }
-        if(lastCreatedOrderId == null || lastCreatedOrderId == 0){
-          throw Exception("Không thể trích xuất ID đơn hàng từ phản hồi của Backend.");
+        if (lastCreatedOrderId == null || lastCreatedOrderId == 0) {
+          throw Exception(
+            "Không thể trích xuất ID đơn hàng từ phản hồi của Backend.",
+          );
         }
         if (selectedPaymentMethod == "VNPAY") {
           final vnpayUrl = await _orderService.createPaymentUrl(
@@ -127,5 +131,15 @@ class OrderController extends ChangeNotifier {
       notifyListeners();
       return null;
     }
+  }
+
+  OrderSummaryModel buildOrderSummary() {
+    return OrderSummaryModel(
+      orderId: lastCreatedOrderId,
+      items: orderItems,
+      address: selectedAddress,
+      paymentMethod: selectedPaymentMethod,
+      totalAmount: totalProductPrice,
+    );
   }
 }
