@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/buyer/order_controller.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/order_success_screen.dart';
 import 'package:sales_online_app/ui/buyer/order/vnpay_payment_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,11 +11,13 @@ import 'package:url_launcher/url_launcher.dart';
 class OrderButtonBar extends StatelessWidget {
   final bool isDark;
   final OrderController controller;
+  final CartController cartController;
 
   const OrderButtonBar({
     super.key,
     required this.isDark,
     required this.controller,
+    required this.cartController,
   });
 
   Future<void> _handleOrderProcessing(BuildContext context) async {
@@ -68,8 +71,10 @@ class OrderButtonBar extends StatelessWidget {
         if (isPaidSuccess == true) {
           await navigator.pushReplacement(
             MaterialPageRoute<void>(
-              builder: (context) =>
-                  OrderSuccessScreen(summary: controller.buildOrderSummary()),
+              builder: (context) => OrderSuccessScreen(
+                summary: controller.buildOrderSummary(),
+                cartController: cartController,
+              ),
             ),
           );
         } else {
@@ -84,8 +89,10 @@ class OrderButtonBar extends StatelessWidget {
     } else {
       await navigator.pushReplacement(
         MaterialPageRoute<void>(
-          builder: (context) =>
-              OrderSuccessScreen(summary: controller.buildOrderSummary()),
+          builder: (context) => OrderSuccessScreen(
+            summary: controller.buildOrderSummary(),
+            cartController: cartController,
+          ),
         ),
       );
     }

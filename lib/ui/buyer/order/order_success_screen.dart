@@ -2,14 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/data/models/order_summary_model.dart';
+import 'package:sales_online_app/logic/cart/cart_controller.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final OrderSummaryModel summary;
+  final CartController cartController;
 
-  const OrderSuccessScreen({super.key, required this.summary});
+  const OrderSuccessScreen({
+    super.key,
+    required this.summary,
+    required this.cartController,
+  });
 
-  void _finishOrderFlow(BuildContext context) {
-    Navigator.of(context).pop('order_success');
+  void _finishOrderFlow(BuildContext context) async {
+    for (final item in summary.items) {
+      await cartController.removeItem(item.id);
+    }
+
+    await cartController.loadCart();
+
+    if (context.mounted) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   void _openOrderDetail(BuildContext context) {

@@ -279,7 +279,7 @@ class _CartScreenState extends State<CartScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          OrderScreen(selectedCartItems: selectedItems),
+                          OrderScreen(selectedCartItems: selectedItems, cartController: controller,),
                     ),
                   );
                   if (context.mounted) {
