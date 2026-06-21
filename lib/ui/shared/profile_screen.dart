@@ -13,17 +13,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool isSellerMode = false; // Biến trạng thái switch chế độ BUYER/SELLER
+  bool isSellerMode = false;
 
   @override
   Widget build(BuildContext context) {
     final User? user = FirebaseAuth.instance.currentUser;
     final String displayName = user?.displayName ?? user?.email ?? "Người dùng";
 
-    // Đồng bộ trạng thái Dark Mode từ hệ thống
     final bool isDarkMode = themeProvider.currTheme == ThemeMode.dark;
 
-    // Định nghĩa màu sắc động thích ứng theo Theme
     final Color textColor = isDarkMode ? Colors.white : Colors.black87;
     final Color subTextColor = isDarkMode ? Colors.white70 : Colors.grey.shade600;
     final Color cardColor = isDarkMode ? Colors.grey[850]! : Colors.white;
@@ -34,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-            // --- 1. HEADER XANH DƯƠNG CHUẨN UI ---
+            // --- 1. HEADER XANH DƯƠNG ---
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 60, bottom: 30, left: 20, right: 20),
@@ -47,7 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Row(
                 children: [
-                  // Icon tròn thay đổi theo chế độ
                   Container(
                     width: 80,
                     height: 80,
@@ -66,7 +63,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(width: 20),
-                  // Tên hiển thị linh hoạt theo thiết kế
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -78,7 +74,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade800.withOpacity(0.5),
+                          // SỬA: Đổi .withOpacity sang .withValues chuẩn Flutter 2026
+                          color: Colors.blue.shade800.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Row(
@@ -129,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         TextButton(
                           onPressed: () {
                             setState(() {
-                              isSellerMode = !isSellerMode; // Switch giao diện qua lại công bằng
+                              isSellerMode = !isSellerMode;
                             });
                           },
                           child: Text(
@@ -143,9 +140,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 25),
 
-                  // --- 3. ĐỔI LOGIC BODY THEO ISSELLERMODE ---
+                  // --- 3. BODY THEO CHẾ ĐỘ ---
                   if (!isSellerMode) ...[
-                    // GIAO DIỆN BUYER (ĐƠN MUA CỦA TÔI)
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0, bottom: 12),
                       child: Text("ĐƠN MUA CỦA TÔI", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor, letterSpacing: 0.5)),
@@ -163,7 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ] else ...[
-                    // GIAO DIỆN SELLER (QUẢN LÝ CỬA HÀNG - LƯỚI 4 Ô)
                     Padding(
                       padding: const EdgeInsets.only(left: 8.0, bottom: 12),
                       child: Text("QUẢN LÝ CỬA HÀNG", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor, letterSpacing: 0.5)),
@@ -183,12 +178,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // CARD TRANG HIỂN THỊ SHOP (DARK BANNER)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: isDarkMode ? Colors.black45 : const Color(0xFF1E293B), // Màu đen titan sang trọng
+                        color: isDarkMode ? Colors.black45 : const Color(0xFF1E293B),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Row(
@@ -202,7 +196,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Text("Xem giao diện khách hàng nhìn thấy", style: TextStyle(color: Colors.white60, fontSize: 13)),
                             ],
                           ),
-                          Icon(Icons.arrow_forward_rounded, color: Colors.white.withOpacity(0.8), size: 24),
+                          // SỬA: Đổi .withOpacity sang .withValues
+                          Icon(Icons.arrow_forward_rounded, color: Colors.white.withValues(alpha: 0.8), size: 24),
                         ],
                       ),
                     ),
@@ -210,7 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 25),
 
-                  // --- 4. CARD TIỆN ÍCH KHÁC (LUÔN CÓ VÀ ĐỒNG BỘ DARKMODE) ---
+                  // --- 4. CARD TIỆN ÍCH KHÁC ---
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0, bottom: 12),
                     child: Text("TIỆN ÍCH KHÁC", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor, letterSpacing: 0.5)),
@@ -229,13 +224,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         Divider(color: isDarkMode ? Colors.grey[700] : Colors.grey[200], height: 20),
 
-                        // DÒNG DARK MODE HOẠT ĐỘNG THÔNG MINH
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: isDarkMode ? Colors.amber.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                              // SỬA: Đổi .withOpacity sang .withValues
+                              color: isDarkMode ? Colors.amber.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Icon(
@@ -249,7 +244,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),
                           ),
                           trailing: Switch(
-                            activeColor: const Color(0xFF0056D2),
+                            // SỬA: Đổi activeColor sang activeThumbColor để hết warning
+                            activeThumbColor: const Color(0xFF0056D2),
                             value: isDarkMode,
                             onChanged: (value) {
                               themeProvider.toggleTheme();
@@ -281,7 +277,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper Khung Card
   Widget _buildCard({required Widget child, required bool isDarkMode, required Color cardColor}) {
     return Container(
       width: double.infinity,
@@ -291,7 +286,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: isDarkMode ? Colors.transparent : Colors.black.withOpacity(0.03),
+            // SỬA: Đổi .withOpacity sang .withValues
+            color: isDarkMode ? Colors.transparent : Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -301,7 +297,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper ô tính năng quản lý của Seller (Lưới 4 ô chuẩn ảnh)
   Widget _buildSellerGridItem(IconData icon, Color color, String title, bool isDarkMode, Color cardColor, Color textColor) {
     return Container(
       decoration: BoxDecoration(
@@ -309,7 +304,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: isDarkMode ? Colors.transparent : Colors.black.withOpacity(0.03),
+            // SỬA: Đổi .withOpacity sang .withValues
+            color: isDarkMode ? Colors.transparent : Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -321,7 +317,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              // SỬA: Đổi .withOpacity sang .withValues
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 26),
@@ -337,7 +334,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper Icon Đơn mua hàng (Buyer)
   Widget _buildOrderIcon(IconData icon, String label, bool isDarkMode) {
     return Column(
       children: [
@@ -359,7 +355,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper dòng Menu Option
   Widget _buildMenuOption({
     required IconData icon,
     required Color iconColor,
@@ -374,7 +369,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.1),
+          // SỬA: Đổi .withOpacity sang .withValues
+          color: iconColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: iconColor, size: 22),
