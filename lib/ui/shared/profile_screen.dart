@@ -270,7 +270,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               leading: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: isDarkMode ? Colors.amber.withValues(alpha: 0.1) : Colors.orange.withOpacity(0.1),
+                                  color: isDarkMode ? Colors.amber.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(
