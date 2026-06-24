@@ -4,8 +4,15 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class HomeHeader extends StatelessWidget {
   final VoidCallback onSearchTap;
+  final VoidCallback onNotificationTap;
+  final int notificationCount;
 
-  const HomeHeader({super.key, required this.onSearchTap});
+  const HomeHeader({
+    super.key,
+    required this.onSearchTap,
+    required this.onNotificationTap,
+    required this.notificationCount,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +62,7 @@ class HomeHeader extends StatelessWidget {
           ),
           AppSpacing.w16,
           InkWell(
-            onTap: () => {},
+            onTap: onNotificationTap,
             borderRadius: AppRadius.circular,
             child: Container(
               height: 32,
@@ -66,23 +73,17 @@ class HomeHeader extends StatelessWidget {
                 shape: BoxShape.rectangle,
                 borderRadius: AppRadius.xLarge,
               ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(CupertinoIcons.bell, color: Colors.white, size: 24),
-                  Positioned(
-                    top: 4,
-                    right: 4,
-                    child: Container(
-                      height: 8,
-                      width: 8,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ],
+              child: Badge(
+                isLabelVisible: notificationCount > 0,
+                label: Text(
+                  notificationCount > 99 ? '99+' : '$notificationCount',
+                ),
+                backgroundColor: Colors.red,
+                child: const Icon(
+                  CupertinoIcons.bell,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
           ),
