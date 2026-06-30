@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
+import 'package:sales_online_app/logic/notification/notification_controller.dart';
 import 'package:sales_online_app/ui/buyer/cart/cart_screen.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
 import 'package:sales_online_app/ui/shared/temp_screen.dart';
@@ -18,12 +19,14 @@ class MainWrapperScreen extends StatefulWidget {
 
 class _MainWrapperScreen extends State<MainWrapperScreen> {
   late final CartController _cartController;
+  late final NotificationController _notificationController;
   int _currIndex = 0;
 
   List<Widget> get _tabs => [
     HomeTab(
       controller: widget.controller,
       cartController: _cartController,
+      notificationController: _notificationController,
       onTabSelected: _selectTab,
     ),
     CartScreen(controller: _cartController),
@@ -40,12 +43,17 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
   void initState() {
     super.initState();
     _cartController = CartController(userId: widget.controller.session?.userId);
+    _notificationController = NotificationController(
+      role: widget.controller.session?.role ?? 'BUYER',
+    );
     _cartController.loadCart();
+    _notificationController.initialize();
   }
 
   @override
   void dispose() {
     _cartController.dispose();
+    _notificationController.dispose();
     super.dispose();
   }
 
