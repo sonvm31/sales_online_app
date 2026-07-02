@@ -42,6 +42,20 @@ class ProductModel {
       imageUrl: (json['imageUrl'] as String?) ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'shop': shop.toJson(),
+      'category': category.toJson(),
+      'productLine': productLine.toJson(),
+      'name': name,
+      'description': description,
+      'price': price,
+      'stockQuantity': stockQuantity,
+      'imageUrl': imageUrl,
+    };
+  }
 }
 
 class ShopModel {
@@ -68,6 +82,16 @@ class ShopModel {
       isActive: (json['isActive'] as bool?) ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'avatarUrl': avatarUrl,
+      'isActive': isActive,
+    };
+  }
 }
 
 class ProductLineModel {
@@ -90,6 +114,15 @@ class ProductLineModel {
       name: (json['name'] as String?) ?? '',
       description: (json['description'] as String?) ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'category': category.toJson(),
+      'name': name,
+      'description': description,
+    };
   }
 }
 
