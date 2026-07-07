@@ -7,7 +7,6 @@ import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/data/services/product_line_service.dart';
 
 class ProductManagementScreen extends StatefulWidget {
-  final bool startWithCreate;
   final int shopId;
   final String shopName;
 
@@ -15,7 +14,6 @@ class ProductManagementScreen extends StatefulWidget {
     super.key,
     required this.shopId,
     required this.shopName,
-    this.startWithCreate = false,
   });
 
   @override
@@ -67,12 +65,6 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
           'Không có product line nào. Vui lòng kiểm tra /api/product-lines.',
         );
       }
-
-      if (widget.startWithCreate) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _openProductForm();
-        });
-      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -87,21 +79,17 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
 
   Future<void> _saveProduct(
     _ProductFormData data, {
-    ProductModel? editing,
+    required ProductModel editing,
   }) async {
     setState(() => _isSaving = true);
 
     try {
       final payload = data.toPayload(
         shopId: widget.shopId,
-        editingId: editing?.id,
+        editingId: editing.id,
       );
 
-      if (editing == null) {
-        await _productService.createProduct(payload);
-      } else {
-        await _productService.updateProduct(editing.id, payload);
-      }
+      await _productService.updateProduct(editing.id, payload);
 
       await _loadData();
     } finally {
@@ -111,7 +99,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     }
   }
 
-  void _openProductForm({ProductModel? product}) {
+  void _openProductForm(ProductModel product) {
     if (_categories.isEmpty || _productLines.isEmpty) return;
 
     showModalBottomSheet<void>(
@@ -194,13 +182,6 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isLoading || _isSaving ? null : _openProductForm,
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Thêm sản phẩm'),
-      ),
       body: Stack(
         children: [
           RefreshIndicator(
@@ -265,7 +246,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     if (_products.isEmpty) {
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: [_EmptyProductState(onCreate: _openProductForm)],
+        children: const [_EmptyProductState()],
       );
     }
 
@@ -277,7 +258,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
         return _ProductTile(
           product: product,
           isDark: isDark,
-          onEdit: () => _openProductForm(product: product),
+          onEdit: () => _openProductForm(product),
           onDelete: () => _deleteProduct(product),
         );
       },
@@ -402,9 +383,7 @@ class _ProductTile extends StatelessWidget {
 }
 
 class _EmptyProductState extends StatelessWidget {
-  final VoidCallback onCreate;
-
-  const _EmptyProductState({required this.onCreate});
+  const _EmptyProductState();
 
   @override
   Widget build(BuildContext context) {
@@ -444,15 +423,9 @@ class _EmptyProductState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Thêm sản phẩm đầu tiên để bắt đầu quản lý cửa hàng.',
+              'Shop hiện chưa có sản phẩm nào để quản lý.',
               textAlign: TextAlign.center,
               style: TextStyle(color: mutedColor),
-            ),
-            const SizedBox(height: 18),
-            FilledButton.icon(
-              onPressed: onCreate,
-              icon: const Icon(Icons.add_rounded),
-              label: const Text('Đăng sản phẩm'),
             ),
           ],
         ),
@@ -464,7 +437,7 @@ class _EmptyProductState extends StatelessWidget {
 class _ProductFormSheet extends StatefulWidget {
   final List<CategoryModel> categories;
   final List<ProductLineModel> productLines;
-  final ProductModel? product;
+  final ProductModel product;
   final int shopId;
   final ValueChanged<_ProductFormData> onSave;
 
@@ -494,22 +467,20 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
   void initState() {
     super.initState();
     final product = widget.product;
-    _nameController = TextEditingController(text: product?.name ?? '');
-    _descriptionController = TextEditingController(
-      text: product?.description ?? '',
-    );
+    _nameController = TextEditingController(text: product.name);
+    _descriptionController = TextEditingController(text: product.description);
     _priceController = TextEditingController(
-      text: product == null ? '' : product.price.toStringAsFixed(0),
+      text: product.price.toStringAsFixed(0),
     );
     _stockController = TextEditingController(
-      text: product == null ? '' : product.stockQuantity.toString(),
+      text: product.stockQuantity.toString(),
     );
-    _imageController = TextEditingController(text: product?.imageUrl ?? '');
+    _imageController = TextEditingController(text: product.imageUrl);
     _selectedCategory = widget.categories.firstWhere(
-      (item) => item.id == product?.category.id,
+      (item) => item.id == product.category.id,
       orElse: () => widget.categories.first,
     );
-    _selectedProductLine = _resolveInitialProductLine(product);
+    _selectedProductLine = _resolveInitialProductLine();
   }
 
   @override
@@ -541,11 +512,11 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
     return null;
   }
 
-  ProductLineModel? _resolveInitialProductLine(ProductModel? product) {
+  ProductLineModel? _resolveInitialProductLine() {
     if (widget.productLines.isEmpty) return null;
 
     for (final item in widget.productLines) {
-      if (item.id == product?.productLine.id) {
+      if (item.id == widget.product.productLine.id) {
         return item;
       }
     }
@@ -584,7 +555,6 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-    final isEditing = widget.product != null;
 
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
@@ -605,7 +575,7 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        isEditing ? 'Sửa sản phẩm' : 'Đăng sản phẩm',
+                        'Sửa sản phẩm',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
@@ -742,7 +712,7 @@ class _ProductFormSheetState extends State<_ProductFormSheet> {
                   height: 50,
                   child: FilledButton(
                     onPressed: _submit,
-                    child: Text(isEditing ? 'Lưu thay đổi' : 'Tạo sản phẩm'),
+                    child: const Text('Lưu thay đổi'),
                   ),
                 ),
               ],
