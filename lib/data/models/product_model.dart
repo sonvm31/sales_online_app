@@ -42,6 +42,20 @@ class ProductModel {
       imageUrl: (json['imageUrl'] as String?) ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'shop': shop.toJson(),
+      'category': category.toJson(),
+      'productLine': productLine.toJson(),
+      'name': name,
+      'description': description,
+      'price': price,
+      'stockQuantity': stockQuantity,
+      'imageUrl': imageUrl,
+    };
+  }
 }
 
 class ShopModel {
@@ -50,9 +64,9 @@ class ShopModel {
   final String description;
   final String avatarUrl;
   final bool isActive;
-  final double latitude;
-  final double longitude;
-  final String address;
+  final double? latitude;
+  final double? longitude;
+  final String? address;
 
   const ShopModel({
     required this.id,
@@ -60,9 +74,9 @@ class ShopModel {
     required this.description,
     required this.avatarUrl,
     required this.isActive,
-    required this.latitude,
-    required this.longitude,
-    required this.address,
+    this.latitude,
+    this.longitude,
+    this.address,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
@@ -76,6 +90,16 @@ class ShopModel {
       longitude: (json['longitude'] as num?)?.toDouble() ?? 106.809900,
       address: (json['address'] as String?) ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'avatarUrl': avatarUrl,
+      'isActive': isActive,
+    };
   }
 }
 
@@ -99,6 +123,15 @@ class ProductLineModel {
       name: (json['name'] as String?) ?? '',
       description: (json['description'] as String?) ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'category': category.toJson(),
+      'name': name,
+      'description': description,
+    };
   }
 }
 

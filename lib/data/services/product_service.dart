@@ -93,10 +93,7 @@ class ProductService {
             .toList();
         final bool isLastPage = responseData['last'] ?? true;
 
-        return {
-          'products': productList,
-          'isLast': isLastPage
-        };
+        return {'products': productList, 'isLast': isLastPage};
       } else {
         throw Exception('Lỗi kết nối API Search: ${response.statusCode}');
       }
@@ -119,5 +116,90 @@ class ProductService {
     } catch (e) {
       throw Exception('Không thể lấy thông tin sản phẩm: $e');
     }
+  }
+
+  Future<List<ProductModel>> fetchShopProducts(int shopId) async {
+    try {
+      final response = await _dio.get('/products/shop/$shopId');
+
+      if (response.statusCode == 200) {
+        return _parseProductList(response.data);
+      }
+
+      throw Exception('Lỗi máy chủ: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Không thể lấy danh sách sản phẩm của shop: $e');
+    }
+  }
+
+  Future<ProductModel> updateProduct(
+    int id,
+    Map<String, dynamic> payload,
+  ) async {
+    try {
+      final response = await _dio.put('/products/$id', data: payload);
+
+      if (response.statusCode == 200) {
+        return _parseSingleProduct(response.data);
+      }
+
+      throw Exception('Lỗi máy chủ: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Không thể cập nhật sản phẩm: $e');
+    }
+  }
+
+  Future<void> deleteProduct(int id) async {
+    try {
+      final response = await _dio.delete('/products/$id');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      }
+
+      throw Exception('Lỗi máy chủ: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Không thể xóa sản phẩm: $e');
+    }
+  }
+
+  List<ProductModel> _parseProductList(dynamic data) {
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((json) => ProductModel.fromJson(Map<String, dynamic>.from(json)))
+          .toList();
+    }
+
+    if (data is Map<String, dynamic>) {
+      final dynamic rawItems =
+          data['data'] ?? data['content'] ?? data['products'];
+
+      if (rawItems is List) {
+        return rawItems
+            .whereType<Map>()
+            .map(
+              (json) => ProductModel.fromJson(Map<String, dynamic>.from(json)),
+            )
+            .toList();
+      }
+    }
+
+    return <ProductModel>[];
+  }
+
+  ProductModel _parseSingleProduct(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      final dynamic rawProduct = data['data'] ?? data['product'] ?? data;
+      if (rawProduct is Map) {
+        return ProductModel.fromJson(Map<String, dynamic>.from(rawProduct));
+      }
+    }
+
+    if (data is Map) {
+      return ProductModel.fromJson(Map<String, dynamic>.from(data));
+    }
+
+    throw Exception('Dữ liệu sản phẩm không hợp lệ.');
   }
 }

@@ -3,20 +3,24 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/logic/buyer/home_controller.dart';
+import 'package:sales_online_app/logic/notification/notification_controller.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/category_section.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/home_header.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_section.dart';
+import 'package:sales_online_app/ui/buyer/notification/notification_screen.dart';
 import 'package:sales_online_app/ui/buyer/search/search_history_screen.dart';
 
 class HomeTab extends StatefulWidget {
   final AuthController controller;
   final CartController cartController;
+  final NotificationController notificationController;
   final ValueChanged<int> onTabSelected;
 
   const HomeTab({
     super.key,
     required this.controller,
     required this.cartController,
+    required this.notificationController,
     required this.onTabSelected,
   });
 
@@ -48,18 +52,31 @@ class _HomeTabState extends State<HomeTab> {
       builder: (context, child) {
         return Column(
           children: [
-            HomeHeader(
-              onSearchTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SearchHistoryScreen(
-                      cartController: widget.cartController,
-                      onTabSelected: widget.onTabSelected,
+            ListenableBuilder(
+              listenable: widget.notificationController,
+              builder: (context, child) => HomeHeader(
+                notificationCount: widget.notificationController.unreadCount,
+                onNotificationTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => NotificationScreen(
+                        controller: widget.notificationController,
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+                onSearchTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchHistoryScreen(
+                        cartController: widget.cartController,
+                        onTabSelected: widget.onTabSelected,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
             Expanded(
               child: RefreshIndicator(
