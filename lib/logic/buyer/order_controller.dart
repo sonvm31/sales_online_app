@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/data/models/order_summary_model.dart';
@@ -18,12 +19,19 @@ class OrderController extends ChangeNotifier {
   double latitude = 10.841200;
   double longitude = 106.809900;
 
+  double shippingFee = 0.0;
+  bool isCalculatingShipping = false;
+
   bool isLoading = false;
   String? errMessage;
   int? lastCreatedOrderId;
 
+  double get shopLatitude => orderItems.isNotEmpty ? orderItems.first.product.shop.latitude : 10.841200;
+  double get shopLongitude => orderItems.isNotEmpty ? orderItems.first.product.shop.longitude : 106.809900;
+
   OrderController({required this.orderItems, this.authController}) {
     _initDynamicUserData();
+    fetchShippingFee();
   }
 
   void _initDynamicUserData() {
@@ -43,6 +51,57 @@ class OrderController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchShippingFee() async {
+    if (orderItems.isEmpty) return;
+    isCalculatingShipping = true;
+    notifyListeners();
+    try {
+      double shopLat = shopLatitude;
+      double shopLng = shopLongitude;
+
+      final shopAddress = orderItems.first.product.shop.address;
+      if (shopAddress.isNotEmpty) {
+        try {
+          final dio = Dio();
+          final response = await dio.get(
+            'https://nominatim.openstreetmap.org/search',
+            queryParameters: {
+              'q': shopAddress,
+              'format': 'json',
+              'limit': 1,
+              'accept-language': 'vi',
+              'countrycodes': 'vn',
+            },
+            options: Options(
+              headers: {'User-Agent': 'SalesOnlineApp/1.0 (fuongduy@gmail.com)'},
+            ),
+          );
+          if (response.statusCode == 200 && response.data is List && (response.data as List).isNotEmpty) {
+            final first = (response.data as List).first;
+            shopLat = double.tryParse(first['lat'].toString()) ?? shopLat;
+            shopLng = double.tryParse(first['lon'].toString()) ?? shopLng;
+            debugPrint("Quy đổi địa chỉ shop thành công: $shopLat, $shopLng");
+          }
+        } catch (e) {
+          debugPrint("Lỗi quy đổi địa chỉ shop: $e");
+        }
+      }
+
+      final fee = await _orderService.calculateShippingFee(
+        shopLat: shopLat,
+        shopLng: shopLng,
+        userLat: latitude,
+        userLng: longitude,
+      );
+      shippingFee = fee;
+    } catch (e) {
+      debugPrint("Lỗi tính phí vận chuyển: $e");
+    } finally {
+      isCalculatingShipping = false;
+      notifyListeners();
+    }
+  }
+
   void updateLocationInfo({
     required String address,
     required double lat,
@@ -52,6 +111,7 @@ class OrderController extends ChangeNotifier {
     latitude = lat;
     longitude = lng;
     notifyListeners();
+    fetchShippingFee();
   }
 
   Future<String?> processPlaceOrder() async {
@@ -112,7 +172,7 @@ class OrderController extends ChangeNotifier {
         if (selectedPaymentMethod == "VNPAY") {
           final vnpayUrl = await _orderService.createPaymentUrl(
             orderId: lastCreatedOrderId!,
-            amount: totalProductPrice,
+            amount: totalProductPrice + shippingFee,
             paymentMethod: selectedPaymentMethod,
           );
           isLoading = false;
@@ -139,7 +199,7 @@ class OrderController extends ChangeNotifier {
       items: orderItems,
       address: selectedAddress,
       paymentMethod: selectedPaymentMethod,
-      totalAmount: totalProductPrice,
+      totalAmount: totalProductPrice + shippingFee,
     );
   }
 }
