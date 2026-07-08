@@ -26,9 +26,13 @@ class OrderController extends ChangeNotifier {
   String? errMessage;
   int? lastCreatedOrderId;
 
-  double get shopLatitude => orderItems.isNotEmpty ? orderItems.first.product.shop.latitude : 10.841200;
-  double get shopLongitude => orderItems.isNotEmpty ? orderItems.first.product.shop.longitude : 106.809900;
+  double get shopLatitude => orderItems.isNotEmpty
+      ? (orderItems.first.product.shop.latitude ?? 10.841200)
+      : 10.841200;
 
+  double get shopLongitude => orderItems.isNotEmpty
+      ? (orderItems.first.product.shop.longitude ?? 106.809900)
+      : 106.809900;
   OrderController({required this.orderItems, this.authController}) {
     _initDynamicUserData();
     fetchShippingFee();
@@ -60,7 +64,7 @@ class OrderController extends ChangeNotifier {
       double shopLng = shopLongitude;
 
       final shopAddress = orderItems.first.product.shop.address;
-      if (shopAddress.isNotEmpty) {
+      if (shopAddress!.isNotEmpty) {
         try {
           final dio = Dio();
           final response = await dio.get(
