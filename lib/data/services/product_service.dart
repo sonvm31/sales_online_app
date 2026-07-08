@@ -132,20 +132,6 @@ class ProductService {
     }
   }
 
-  Future<ProductModel> createProduct(Map<String, dynamic> payload) async {
-    try {
-      final response = await _dio.post('/products', data: payload);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return _parseSingleProduct(response.data);
-      }
-
-      throw Exception('Lỗi máy chủ: ${response.statusCode}');
-    } catch (e) {
-      throw Exception('Không thể tạo sản phẩm: $e');
-    }
-  }
-
   Future<ProductModel> updateProduct(
     int id,
     Map<String, dynamic> payload,

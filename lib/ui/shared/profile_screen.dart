@@ -37,11 +37,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String get _shopName => 'Shop Của Tôi';
 
-  void _openProductManagement({bool createFirst = false}) {
+  void _openProductManagement() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ProductManagementScreen(
-          startWithCreate: createFirst,
           shopId: widget.controller.session?.userId ?? 0,
           shopName: _shopName,
         ),
@@ -129,15 +128,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisSpacing: 16,
                       childAspectRatio: 1.12,
                       children: [
-                        _SellerActionTile(
-                          title: 'Đăng sản phẩm',
-                          icon: Icons.add_rounded,
-                          iconColor: AppColors.primary,
-                          tintColor: const Color(0xFFEAF2FF),
-                          isDark: isDark,
-                          onTap: () =>
-                              _openProductManagement(createFirst: true),
-                        ),
                         _SellerActionTile(
                           title: 'Sản phẩm của tôi',
                           icon: Icons.storefront_outlined,
