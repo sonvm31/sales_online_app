@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/order_status_helper.dart';
 import 'package:sales_online_app/data/models/order_model.dart';
 import 'package:sales_online_app/data/services/order_service.dart';
+import 'package:sales_online_app/ui/shared/order_tracking_screen.dart';
 
 class OrderManagementScreen extends StatefulWidget {
   final int shopId;
@@ -234,40 +236,6 @@ class _OrderCardState extends State<_OrderCard> {
     _selectedStatus = widget.order.status;
   }
 
-  String _statusLabel(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return 'Đang chuẩn bị hàng';
-      case 'SHIPPING':
-        return 'Đang giao hàng';
-      case 'PAID':
-        return 'Đã thanh toán';
-      case 'DONE':
-        return 'Hoàn tất';
-      case 'CANCELLED':
-        return 'Đã hủy';
-      default:
-        return status;
-    }
-  }
-
-  Color _statusColor(String status) {
-    switch (status.toUpperCase()) {
-      case 'PENDING':
-        return const Color(0xFFF59E0B);
-      case 'SHIPPING':
-        return const Color(0xFF3B82F6);
-      case 'PAID':
-        return const Color(0xFF8B5CF6);
-      case 'DONE':
-        return const Color(0xFF22C55E);
-      case 'CANCELLED':
-        return const Color(0xFFEF4444);
-      default:
-        return Colors.grey;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textColor = widget.isDark
@@ -370,7 +338,7 @@ class _OrderCardState extends State<_OrderCard> {
                 Text(
                   'Đơn hàng đã hủy, không thể thao tác.',
                   style: TextStyle(
-                    color: _statusColor('CANCELLED'),
+                    color: OrderStatusHelper.color('CANCELLED'),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -384,15 +352,15 @@ class _OrderCardState extends State<_OrderCard> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: _statusColor(
+                      color: OrderStatusHelper.color(
                         _selectedStatus,
                       ).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(99),
                     ),
                     child: Text(
-                      _statusLabel(_selectedStatus),
+                      OrderStatusHelper.label(_selectedStatus),
                       style: TextStyle(
-                        color: _statusColor(_selectedStatus),
+                        color: OrderStatusHelper.color(_selectedStatus),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -485,6 +453,18 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  void _openTracking() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderTrackingScreen(
+          orderId: widget.orderId,
+          role: OrderTrackingRole.seller,
+          orderService: widget.orderService,
+        ),
+      ),
+    );
   }
 
   @override
@@ -627,6 +607,15 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _openTracking,
+                      icon: const Icon(Icons.map_outlined),
+                      label: const Text('Theo dõi giao hàng'),
                     ),
                   ),
                   const SizedBox(height: 12),
