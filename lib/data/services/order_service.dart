@@ -115,4 +115,32 @@ class OrderService {
 
     return <OrderModel>[];
   }
+
+  Future<double> calculateShippingFee({
+    required double shopLat,
+    required double shopLng,
+    required double userLat,
+    required double userLng,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/shipping/calculate',
+        queryParameters: {
+          'shopLat': shopLat,
+          'shopLng': shopLng,
+          'userLat': userLat,
+          'userLng': userLng,
+        },
+      );
+      if (response.statusCode == 200) {
+        return double.tryParse(response.data.toString()) ?? 0.0;
+      }
+      throw Exception('Không thể tính phí ship từ máy chủ.');
+    } on DioException catch (e) {
+      final errMessage = e.response?.data?['message'] ?? "Lỗi kết nối Server!";
+      throw Exception(errMessage);
+    } catch (e) {
+      throw Exception("Đã xảy ra lỗi ngoài dự kiến khi tính phí ship.");
+    }
+  }
 }

@@ -64,6 +64,9 @@ class ShopModel {
   final String description;
   final String avatarUrl;
   final bool isActive;
+  final double? latitude;
+  final double? longitude;
+  final String? address;
 
   const ShopModel({
     required this.id,
@@ -71,6 +74,9 @@ class ShopModel {
     required this.description,
     required this.avatarUrl,
     required this.isActive,
+    this.latitude,
+    this.longitude,
+    this.address,
   });
 
   factory ShopModel.fromJson(Map<String, dynamic> json) {
@@ -80,6 +86,9 @@ class ShopModel {
       description: (json['description'] as String?) ?? '',
       avatarUrl: (json['avatarUrl'] as String?) ?? '',
       isActive: (json['isActive'] as bool?) ?? false,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 10.841200,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 106.809900,
+      address: (json['address'] as String?) ?? '',
     );
   }
 

@@ -7,12 +7,16 @@ class OrderSummaryCard extends StatelessWidget {
   final bool isDark;
   final List<CartItemModel> orderItems;
   final double totalProductPrice;
+  final double shippingFee;
+  final bool isCalculatingShipping;
 
   const OrderSummaryCard({
     super.key,
     required this.isDark,
     required this.orderItems,
     required this.totalProductPrice,
+    required this.shippingFee,
+    required this.isCalculatingShipping,
   });
 
   @override
@@ -41,7 +45,7 @@ class OrderSummaryCard extends StatelessWidget {
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
           ),
           ...orderItems.map(
-            (item) => Padding(
+                (item) => Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -81,6 +85,65 @@ class OrderSummaryCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   "Tổng tiền hàng:",
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: isDark ? AppColors.textLight : AppColors.textDark,
+                  ),
+                ),
+              ),
+              Text(
+                "${totalProductPrice.toStringAsFixed(0)}đ",
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: isDark ? AppColors.textLight : AppColors.textDark,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Divider(
+            height: AppSpacing.md,
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  "Phí vận chuyển:",
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: isDark ? AppColors.textLight : AppColors.textDark,
+                  ),
+                ),
+              ),
+              isCalculatingShipping
+                  ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              )
+                  : Text(
+                "${shippingFee.toStringAsFixed(0)}đ",
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: isDark ? AppColors.textLight : AppColors.textDark,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Divider(
+            height: AppSpacing.md,
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Text(
+                  "Tổng thanh toán:",
                   style: AppTextStyles.headingMedium.copyWith(
                     color: isDark ? AppColors.textLight : AppColors.textDark,
                     fontSize: 16.0.sp,
@@ -88,7 +151,7 @@ class OrderSummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "${totalProductPrice.toStringAsFixed(0)}đ",
+                "${(totalProductPrice + shippingFee).toStringAsFixed(0)}đ",
                 style: AppTextStyles.headingLarge.copyWith(
                   color: AppColors.primary,
                 ),
