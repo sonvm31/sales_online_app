@@ -8,9 +8,11 @@ import 'package:sales_online_app/data/services/auth_session_service.dart';
 import 'package:sales_online_app/firebase_options.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/shared/auth/auth_gate.dart';
+import 'package:sales_online_app/ui/shared/auth/password_reset_link_handler.dart';
 
 late final ThemeProvider themeProvider;
 late final AuthController authController;
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,10 +44,15 @@ class MyApp extends StatelessWidget {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Sales Online System',
+              navigatorKey: navigatorKey,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.dartTheme,
               themeMode: themeProvider.currTheme,
-              home: AuthGate(controller: authController),
+              home: PasswordResetLinkHandler(
+                controller: authController,
+                navigatorKey: navigatorKey,
+                child: AuthGate(controller: authController),
+              ),
             );
           },
         );

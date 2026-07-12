@@ -120,4 +120,18 @@ class _FakeAuthRepository implements AuthRepository {
       role: 'BUYER',
     );
   }
+
+  @override
+  Future<void> sendPasswordResetEmail({required String email}) async {}
+
+  @override
+  Future<String> verifyPasswordResetCode({required String code}) async {
+    return 'buyer@example.com';
+  }
+
+  @override
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {}
 }

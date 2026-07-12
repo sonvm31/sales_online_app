@@ -7,6 +7,12 @@ abstract class AuthRepository {
     required String email,
     required String password,
   });
+  Future<void> sendPasswordResetEmail({required String email});
+  Future<String> verifyPasswordResetCode({required String code});
+  Future<void> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  });
 }
 
 class AuthException implements Exception {

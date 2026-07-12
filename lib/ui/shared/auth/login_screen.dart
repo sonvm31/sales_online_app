@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/ui/shared/auth/password_reset_email_screen.dart';
 import 'package:sales_online_app/ui/shared/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -144,6 +145,37 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                         return null;
                       },
+                    ),
+                    AppSpacing.h8,
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: widget.controller.isLoading
+                            ? null
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => PasswordResetEmailScreen(
+                                      controller: widget.controller,
+                                      initialEmail: _emailController.text
+                                          .trim(),
+                                    ),
+                                  ),
+                                );
+                              },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Đổi mật khẩu?',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
                     ),
                     if (widget.controller.errorMessage != null) ...[
                       AppSpacing.h16,
