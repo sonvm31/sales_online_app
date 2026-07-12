@@ -8,7 +8,7 @@ import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
 import 'package:sales_online_app/ui/seller/order_management_screen.dart';
 import 'package:sales_online_app/ui/seller/product_management_screen.dart';
-import 'package:sales_online_app/ui/shared/temp_screen.dart';
+import 'package:sales_online_app/ui/seller/seller_report_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final AuthController controller;
@@ -61,12 +61,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => ShopScreen(shop: shop)));
-  }
-
-  void _openSellerPlaceholder(String title) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => PlaceholderScreen(title: title)),
-    );
   }
 
   Future<void> _logout() async {
@@ -166,7 +160,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           iconColor: const Color(0xFF22C55E),
                           tintColor: const Color(0xFFEAFBF1),
                           isDark: isDark,
-                          onTap: () => _openSellerPlaceholder('Doanh thu'),
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => SellerReportScreen(
+                                shopId: widget.controller.session?.userId ?? 0,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
