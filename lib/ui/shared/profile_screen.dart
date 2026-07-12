@@ -5,6 +5,7 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/main.dart';
+import 'package:sales_online_app/ui/buyer/order/buyer_orders_screen.dart';
 import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
 import 'package:sales_online_app/ui/seller/order_management_screen.dart';
 import 'package:sales_online_app/ui/seller/product_management_screen.dart';
@@ -37,11 +38,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String get _shopName => 'Shop Của Tôi';
 
-  void _openProductManagement({bool createFirst = false}) {
+  void _openProductManagement() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ProductManagementScreen(
-          startWithCreate: createFirst,
           shopId: widget.controller.session?.userId ?? 0,
           shopName: _shopName,
         ),
@@ -61,6 +61,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => ShopScreen(shop: shop)));
+  }
+
+  void _openSellerPlaceholder(String title) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => PlaceholderScreen(title: title)),
+    );
+  }
+
+  void _openBuyerOrders({required String title, String? statusFilter}) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BuyerOrdersScreen(
+          userId: widget.controller.session?.userId,
+          title: title,
+          statusFilter: statusFilter,
+        ),
+      ),
+    );
   }
 
   Future<void> _logout() async {
@@ -123,15 +141,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisSpacing: 16,
                       childAspectRatio: 1.12,
                       children: [
-                        _SellerActionTile(
-                          title: 'Đăng sản phẩm',
-                          icon: Icons.add_rounded,
-                          iconColor: AppColors.primary,
-                          tintColor: const Color(0xFFEAF2FF),
-                          isDark: isDark,
-                          onTap: () =>
-                              _openProductManagement(createFirst: true),
-                        ),
                         _SellerActionTile(
                           title: 'Sản phẩm của tôi',
                           icon: Icons.storefront_outlined,
@@ -294,16 +303,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: CupertinoIcons.time,
                             label: 'Chờ xác nhận',
                             isDark: isDark,
+                            onTap: () => _openBuyerOrders(
+                              title: 'Chờ xác nhận',
+                              statusFilter: 'PENDING',
+                            ),
                           ),
                           _OrderShortcut(
                             icon: CupertinoIcons.cube_box,
                             label: 'Đang giao',
                             isDark: isDark,
+                            onTap: () => _openBuyerOrders(
+                              title: 'Đang giao',
+                              statusFilter: 'SHIPPING',
+                            ),
                           ),
                           _OrderShortcut(
                             icon: CupertinoIcons.check_mark_circled,
                             label: 'Hoàn thành',
                             isDark: isDark,
+                            onTap: () => _openBuyerOrders(
+                              title: 'Hoàn thành',
+                              statusFilter: 'DONE',
+                            ),
                           ),
                         ],
                       ),
@@ -859,11 +880,13 @@ class _OrderShortcut extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isDark;
+  final VoidCallback onTap;
 
   const _OrderShortcut({
     required this.icon,
     required this.label,
     required this.isDark,
+    required this.onTap,
   });
 
   @override
@@ -871,28 +894,35 @@ class _OrderShortcut extends StatelessWidget {
     final textColor = isDark ? AppColors.textLight : const Color(0xFF374151);
 
     return Expanded(
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: isDark
-                ? AppColors.backgroundDark
-                : const Color(0xFFF3F4F6),
-            child: Icon(icon, color: textColor),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 26,
+                backgroundColor: isDark
+                    ? AppColors.backgroundDark
+                    : const Color(0xFFF3F4F6),
+                child: Icon(icon, color: textColor),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: textColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

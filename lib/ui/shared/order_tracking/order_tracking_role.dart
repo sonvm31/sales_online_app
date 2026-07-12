@@ -1,0 +1,1 @@
+enum OrderTrackingRole { buyer, seller }

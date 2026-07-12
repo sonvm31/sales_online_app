@@ -68,48 +68,50 @@ class _OrderScreenState extends State<OrderScreen> {
           ),
           body: _controller.isLoading
               ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                )
+            child: CircularProgressIndicator(color: AppColors.primary),
+          )
               : Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.all(AppSpacing.md),
-                        child: Column(
-                          children: [
-                            AddressCard(
-                              isDark: isDark,
-                              userName: user?.displayName ?? "Chưa cập nhật tên",
-                              userPhone: user?.phoneNumber ?? "Chưa cập nhật SĐT",
-                              selectedAddress: _controller.selectedAddress,
-                              onLocationPicked: (address, lat, lng) =>
-                                  _controller.updateLocationInfo(
-                                    address: address,
-                                    lat: lat,
-                                    lng: lng,
-                                  ),
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    children: [
+                      AddressCard(
+                        isDark: isDark,
+                        userName: user?.displayName ?? "Chưa cập nhật tên",
+                        userPhone: user?.phoneNumber ?? "Chưa cập nhật SĐT",
+                        selectedAddress: _controller.selectedAddress,
+                        onLocationPicked: (address, lat, lng) =>
+                            _controller.updateLocationInfo(
+                              address: address,
+                              lat: lat,
+                              lng: lng,
                             ),
-                            AppSpacing.h16,
-                            OrderSummaryCard(
-                              isDark: isDark,
-                              orderItems: _controller.orderItems,
-                              totalProductPrice: _controller.totalProductPrice,
-                            ),
-                            AppSpacing.h16,
-                            PaymentMethodCard(
-                              isDark: isDark,
-                              selectedPaymentMethod:
-                                  _controller.selectedPaymentMethod,
-                              onMethodChanged: (method) =>
-                                  _controller.setPaymentMethod(method),
-                            ),
-                          ],
-                        ),
                       ),
-                    ),
-                    OrderButtonBar(isDark: isDark, controller: _controller, cartController: widget.cartController,),
-                  ],
+                      AppSpacing.h16,
+                      OrderSummaryCard(
+                        isDark: isDark,
+                        orderItems: _controller.orderItems,
+                        totalProductPrice: _controller.totalProductPrice,
+                        shippingFee: _controller.shippingFee,
+                        isCalculatingShipping: _controller.isCalculatingShipping,
+                      ),
+                      AppSpacing.h16,
+                      PaymentMethodCard(
+                        isDark: isDark,
+                        selectedPaymentMethod:
+                        _controller.selectedPaymentMethod,
+                        onMethodChanged: (method) =>
+                            _controller.setPaymentMethod(method),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
+              OrderButtonBar(isDark: isDark, controller: _controller, cartController: widget.cartController,),
+            ],
+          ),
         );
       },
     );

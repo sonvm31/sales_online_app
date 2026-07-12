@@ -92,6 +92,66 @@ class AuthController extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> sendPasswordResetEmail({required String email}) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.sendPasswordResetEmail(email: email.trim());
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return true;
+    } on AuthException catch (error) {
+      _errorMessage = error.message;
+    } catch (_) {
+      _errorMessage = 'Không thể gửi link đổi mật khẩu. Vui lòng thử lại sau.';
+    }
+
+    _status = AuthStatus.unauthenticated;
+    notifyListeners();
+    return false;
+  }
+
+  Future<String?> verifyPasswordResetCode({required String code}) async {
+    try {
+      return _repository.verifyPasswordResetCode(code: code);
+    } on AuthException catch (error) {
+      _errorMessage = error.message;
+    } catch (_) {
+      _errorMessage = 'Link đổi mật khẩu không hợp lệ.';
+    }
+    notifyListeners();
+    return null;
+  }
+
+  Future<bool> confirmPasswordReset({
+    required String code,
+    required String newPassword,
+  }) async {
+    _status = AuthStatus.authenticating;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _repository.confirmPasswordReset(
+        code: code,
+        newPassword: newPassword,
+      );
+      _status = AuthStatus.unauthenticated;
+      notifyListeners();
+      return true;
+    } on AuthException catch (error) {
+      _errorMessage = error.message;
+    } catch (_) {
+      _errorMessage = 'Không thể cập nhật mật khẩu. Vui lòng thử lại sau.';
+    }
+
+    _status = AuthStatus.unauthenticated;
+    notifyListeners();
+    return false;
+  }
+
   Future<void> logout() async {
     await _sessionService.clear();
     _session = null;
