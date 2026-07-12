@@ -57,6 +57,31 @@ class OrderService {
     }
   }
 
+  Future<List<OrderModel>> fetchOrdersByUser(int userId) async {
+    try {
+      final response = await _dio.get('/orders');
+
+      if (response.statusCode == 200) {
+        final orders =
+            _parseOrders(
+              response.data,
+            ).where((order) => order.user.id == userId).toList()..sort((a, b) {
+              final aDate =
+                  a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              final bDate =
+                  b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+              return bDate.compareTo(aDate);
+            });
+
+        return orders;
+      }
+
+      throw Exception('Lỗi máy chủ: ${response.statusCode}');
+    } catch (e) {
+      throw Exception('Không thể lấy danh sách đơn mua: $e');
+    }
+  }
+
   Future<OrderModel> fetchOrderDetail(int orderId) async {
     try {
       final response = await _dio.get('/orders/$orderId');
@@ -79,7 +104,10 @@ class OrderService {
     required String status,
   }) async {
     try {
-      final response = await _dio.put('/orders/$orderId/$status');
+      final response = await _dio.put(
+        '/orders/$orderId/status',
+        queryParameters: <String, dynamic>{'status': status},
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;

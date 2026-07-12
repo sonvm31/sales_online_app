@@ -3,6 +3,7 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/data/models/order_summary_model.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
+import 'package:sales_online_app/ui/shared/order_tracking_screen.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final OrderSummaryModel summary;
@@ -27,9 +28,20 @@ class OrderSuccessScreen extends StatelessWidget {
   }
 
   void _openOrderDetail(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Màn hình chi tiết đơn hàng sẽ được bổ sung sau.'),
+    final orderId = summary.orderId;
+    if (orderId == null || orderId <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Chưa có mã đơn hàng để theo dõi.')),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderTrackingScreen(
+          orderId: orderId,
+          role: OrderTrackingRole.buyer,
+        ),
       ),
     );
   }
