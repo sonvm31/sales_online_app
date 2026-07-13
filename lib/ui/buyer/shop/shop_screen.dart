@@ -139,8 +139,8 @@ class _ShopScreenState extends State<ShopScreen> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ChatScreen(
-          receiverId: widget.shop.id?.toString() ?? "unknown_shop",
-          receiverName: widget.shop.name ?? "Cửa hàng",
+          receiverId: widget.shop.id.toString(),
+          receiverName: widget.shop.name,
         ),
       ),
     );
@@ -408,7 +408,7 @@ class _ShopHeader extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  shop.name ?? "Cửa hàng",
+                                  shop.name,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTextStyles.headingMedium.copyWith(
@@ -437,7 +437,7 @@ class _ShopHeader extends StatelessWidget {
                               vertical: AppSpacing.xs,
                             ),
                             decoration: BoxDecoration(
-                              color: (shop.isActive ?? false)
+                              color: (shop.isActive)
                                   ? Colors.green.withValues(alpha: 0.12)
                                   : borderColor,
                               borderRadius: AppRadius.circular,

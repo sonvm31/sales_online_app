@@ -37,8 +37,9 @@ class ChatListScreen extends StatelessWidget {
             .where('members', arrayContains: currentUserId)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError)
+          if (snapshot.hasError) {
             return const Center(child: Text("Đã xảy ra lỗi tải danh sách."));
+          }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
