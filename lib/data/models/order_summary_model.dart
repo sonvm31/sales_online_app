@@ -5,6 +5,8 @@ class OrderSummaryModel {
   final List<CartItemModel> items;
   final String address;
   final String paymentMethod;
+  final double productAmount;
+  final double shippingFee;
   final double totalAmount;
 
   const OrderSummaryModel({
@@ -12,6 +14,8 @@ class OrderSummaryModel {
     required this.items,
     required this.address,
     required this.paymentMethod,
+    required this.productAmount,
+    required this.shippingFee,
     required this.totalAmount,
   });
 }
