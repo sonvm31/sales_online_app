@@ -121,8 +121,7 @@ class _OrderTrackingBody extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.all(AppSpacing.md),
         children: [
-          TrackingStatusCard(order: order, role: role),
-          AppSpacing.h16,
+          
           TrackingMapCard(
             order: order,
             routePoints: controller.routePoints,
@@ -130,6 +129,8 @@ class _OrderTrackingBody extends StatelessWidget {
             shopLocation: controller.shopLocation,
             buyerLocation: controller.buyerLocation,
           ),
+          AppSpacing.h16,
+          TrackingStatusCard(order: order, role: role),
           AppSpacing.h16,
           TrackingInfoCard(order: order, role: role),
         ],
