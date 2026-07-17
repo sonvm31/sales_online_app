@@ -3,6 +3,7 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 
 class SellerHeader extends StatelessWidget {
   final String shopName;
+  final bool isActive;
   final bool isLoading;
   final String? errorMessage;
   final VoidCallback onRetry;
@@ -10,6 +11,7 @@ class SellerHeader extends StatelessWidget {
   const SellerHeader({
     super.key,
     required this.shopName,
+    required this.isActive,
     required this.isLoading,
     required this.errorMessage,
     required this.onRetry,
@@ -19,7 +21,7 @@ class SellerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 218,
+      height: 188,
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: BorderRadius.only(
@@ -44,16 +46,16 @@ class SellerHeader extends StatelessWidget {
           Positioned.fill(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                AppSpacing.xl,
-                AppSpacing.xxl,
                 AppSpacing.lg,
                 AppSpacing.xl,
+                AppSpacing.lg,
+                AppSpacing.lg,
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 118,
-                    height: 118,
+                    width: 92,
+                    height: 92,
                     decoration: BoxDecoration(
                       color: AppColors.surfaceLight,
                       shape: BoxShape.circle,
@@ -72,10 +74,10 @@ class SellerHeader extends StatelessWidget {
                     child: const Icon(
                       Icons.storefront_outlined,
                       color: AppColors.primary,
-                      size: 50,
+                      size: 42,
                     ),
                   ),
-                  AppSpacing.w24,
+                  AppSpacing.w16,
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -85,20 +87,21 @@ class SellerHeader extends StatelessWidget {
                           shopName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.display.copyWith(
+                          style: AppTextStyles.headingLarge.copyWith(
                             color: AppColors.textLight,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0,
+                            height: 1.05,
                           ),
                         ),
                         AppSpacing.h8,
                         Row(
                           children: [
                             Icon(
-                              errorMessage == null
+                              errorMessage == null && isActive
                                   ? Icons.circle
                                   : Icons.error_outline,
-                              color: errorMessage == null
+                              color: errorMessage == null && isActive
                                   ? const Color(0xFF65E46F)
                                   : Colors.orangeAccent,
                               size: 16,
@@ -108,12 +111,16 @@ class SellerHeader extends StatelessWidget {
                               child: Text(
                                 isLoading
                                     ? 'Đang tải shop...'
-                                    : errorMessage ?? 'Đã xác thực',
+                                    : errorMessage ??
+                                          (isActive
+                                              ? 'Đã xác thực'
+                                              : 'Shop đang bị khóa/chưa duyệt'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.bodyLarge.copyWith(
                                   color: AppColors.textLight,
                                   fontWeight: FontWeight.w800,
+                                  height: 1.1,
                                 ),
                               ),
                             ),

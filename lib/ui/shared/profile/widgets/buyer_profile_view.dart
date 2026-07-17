@@ -10,7 +10,7 @@ import 'package:sales_online_app/ui/shared/profile/widgets/profile_card.dart';
 class BuyerProfileView extends StatelessWidget {
   final String displayName;
   final bool isDarkThemeEnabled;
-  final VoidCallback onSwitchToSeller;
+  final VoidCallback onRegisterShop;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
   final void Function({required String title, String? statusFilter})
@@ -20,7 +20,7 @@ class BuyerProfileView extends StatelessWidget {
     super.key,
     required this.displayName,
     required this.isDarkThemeEnabled,
-    required this.onSwitchToSeller,
+    required this.onRegisterShop,
     required this.onToggleTheme,
     required this.onLogout,
     required this.onOpenOrders,
@@ -40,7 +40,7 @@ class BuyerProfileView extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -59,9 +59,11 @@ class BuyerProfileView extends StatelessWidget {
                       isDark: isDark,
                       cardColor: cardColor,
                       textColor: textColor,
-                      currentMode: 'Người mua',
-                      buttonText: 'Chuyển sang SELLER',
-                      onPressed: onSwitchToSeller,
+                      title: 'Kênh người bán',
+                      statusLabel: '',
+                      currentMode: 'Đăng ký shop để bắt đầu bán hàng',
+                      buttonText: 'Bắt đầu bán hàng',
+                      onPressed: onRegisterShop,
                     ),
                     AppSpacing.h24,
                     _SectionTitle(text: 'ĐƠN MUA CỦA TÔI', color: textColor),
