@@ -200,7 +200,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (_) => const RequestSupportScreen(
-                                    isSeller: true,
+                                    isSeller: true
                                   ),
                                 ),
                               );
@@ -356,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (_) => const RequestSupportScreen(
-                                    isSeller: true,
+                                    isSeller: true
                                   ),
                                 ),
                               );
