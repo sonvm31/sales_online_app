@@ -191,7 +191,6 @@ class _ChatNavIcon extends StatefulWidget {
   final String currentUserId;
 
   const _ChatNavIcon({
-    super.key,
     required this.currentUserId,
   });
 
