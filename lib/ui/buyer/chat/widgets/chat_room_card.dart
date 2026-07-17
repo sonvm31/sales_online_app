@@ -9,6 +9,7 @@ class ChatRoomCard extends StatelessWidget {
   final Map<String, dynamic> roomData;
   final String roomId;
   final String currentUserId;
+  final String currentUserName;
   final bool isDark;
 
   const ChatRoomCard({
@@ -16,6 +17,7 @@ class ChatRoomCard extends StatelessWidget {
     required this.roomData,
     required this.roomId,
     required this.currentUserId,
+    required this.currentUserName,
     required this.isDark,
   });
 
@@ -37,14 +39,24 @@ class ChatRoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String receiverId = roomData['shopId']?.toString() ??
-        roomId.replaceAll(currentUserId, "").replaceAll("_", "");
-    final String receiverName = roomData['shopName'] as String? ?? "Cửa hàng";
-    final String lastMessage = roomData['lastMessage'] as String? ??
-        "Chưa có tin nhắn";
+    final List<dynamic> members = roomData['members'] as List<dynamic>? ?? [];
+    final bool isSeller = currentUserId == roomData['shopId']?.toString();
+
+    final String receiverId = isSeller
+        ? members.firstWhere((m) => m.toString() != currentUserId, orElse: () => "").toString()
+        : roomData['shopId']?.toString() ?? roomId.replaceAll(currentUserId, "").replaceAll("_", "");
+
+    final String receiverName = isSeller
+        ? roomData['senderName'] as String? ?? "Khách hàng"
+        : roomData['shopName'] as String? ?? "Cửa hàng";
+
+    final String rawLastMessage = roomData['lastMessage'] as String? ?? "";
+    final String lastSenderId = roomData['lastSenderId'] as String? ?? "";
+    final String lastMessage = rawLastMessage.isNotEmpty
+        ? (lastSenderId == currentUserId ? "Bạn: $rawLastMessage" : rawLastMessage)
+        : "Chưa có tin nhắn";
     final Timestamp? lastTimestamp = roomData['lastTimestamp'] as Timestamp?;
 
-    final String lastSenderId = roomData['lastSenderId'] as String? ?? "";
     final bool hasUnread = (lastSenderId != currentUserId) &&
         (roomData['hasUnread'] as bool? ?? false);
     final textMutedColor = isDark ? AppColors.textMutedDark : AppColors
@@ -132,8 +144,17 @@ class ChatRoomCard extends StatelessWidget {
             });
           }
 
-          Navigator.push(context, MaterialPageRoute(builder: (context) =>
-              ChatScreen(receiverId: receiverId, receiverName: receiverName)));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChatScreen(
+                receiverId: receiverId,
+                receiverName: receiverName,
+                currentUserId: currentUserId,
+                currentUserName: currentUserName,
+              ),
+            ),
+          );
         },
       ),
     );
