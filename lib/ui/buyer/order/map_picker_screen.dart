@@ -311,23 +311,17 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                     ),
                   ],
                 ),
-                padding: EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.sm,
-                ),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _isReverseLoading
                         ? const Center(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8),
+                              padding: EdgeInsets.symmetric(vertical: 10),
                               child: SizedBox(
-                                width: 22,
-                                height: 22,
+                                width: 24,
+                                height: 24,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.5,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -343,13 +337,10 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                               color: isDark
                                   ? AppColors.textLight
                                   : AppColors.textDark,
-                              fontWeight: FontWeight.w700,
                             ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.left,
+                            textAlign: TextAlign.center,
                           ),
-                    SizedBox(height: AppSpacing.sm),
+                    SizedBox(height: AppSpacing.md),
                     Text(
                       "Số nhà, tòa nhà, ngõ hẻm (nếu có):",
                       style: AppTextStyles.caption.copyWith(
@@ -360,111 +351,87 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
                       ),
                     ),
                     SizedBox(height: AppSpacing.xs),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.black26
-                                  : Colors.grey.shade100,
-                              borderRadius: AppRadius.medium,
-                              border: Border.all(
-                                color: isDark
-                                    ? AppColors.borderDark
-                                    : AppColors.borderLight,
-                              ),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                            ),
-                            child: TextField(
-                              controller: _houseNumberController,
-                              decoration: const InputDecoration(
-                                hintText: "Số nhà, tầng, hẻm...",
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 10,
-                                ),
-                              ),
-                              style: AppTextStyles.bodyMedium,
-                            ),
-                          ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.black26 : Colors.grey.shade100,
+                        borderRadius: AppRadius.medium,
+                        border: Border.all(
+                          color: isDark
+                              ? AppColors.borderDark
+                              : AppColors.borderLight,
                         ),
-                        SizedBox(width: AppSpacing.sm),
-                        ElevatedButton(
-                          onPressed: _isReverseLoading || _addressText == null
-                              ? null
-                              : () {
-                                  String finalAddress = _addressText!;
-                                  String houseDetail = _houseNumberController
-                                      .text
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                      child: TextField(
+                        controller: _houseNumberController,
+                        decoration: const InputDecoration(
+                          hintText: "Ví dụ: Số 123/4G, Chung cư Blue Sky...",
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        ),
+                        style: AppTextStyles.bodyMedium,
+                      ),
+                    ),
+
+                    SizedBox(height: AppSpacing.md),
+                    ElevatedButton(
+                      onPressed: _isReverseLoading || _addressText == null
+                          ? null
+                          : () {
+                              String finalAddress = _addressText!;
+                              String houseDetail = _houseNumberController.text
+                                  .trim();
+
+                              if (houseDetail.isNotEmpty) {
+                                String rawAddressLower = finalAddress.toLowerCase();
+                                List<String> addressParts = houseDetail.split(',');
+
+                                List<String> cleanParts = [];
+                                for (var part in addressParts) {
+                                  String trimmedPart = part.trim();
+                                  if (trimmedPart.isEmpty) continue;
+
+                                  String partLower = trimmedPart.toLowerCase();
+
+
+                                  String cleanPartLower = partLower
+                                      .replaceAll(RegExp(r'^(đường|duong|đ|d)\s+'), '')
                                       .trim();
 
-                                  if (houseDetail.isNotEmpty) {
-                                    String rawAddressLower = finalAddress
-                                        .toLowerCase();
-                                    List<String> addressParts = houseDetail
-                                        .split(',');
-
-                                    List<String> cleanParts = [];
-                                    for (var part in addressParts) {
-                                      String trimmedPart = part.trim();
-                                      if (trimmedPart.isEmpty) continue;
-
-                                      String partLower = trimmedPart
-                                          .toLowerCase();
-
-                                      String cleanPartLower = partLower
-                                          .replaceAll(
-                                            RegExp(r'^(đường|duong|đ|d)\s+'),
-                                            '',
-                                          )
-                                          .trim();
-
-                                      if (rawAddressLower.contains(partLower) ||
-                                          rawAddressLower.contains(
-                                            cleanPartLower,
-                                          )) {
-                                        continue;
-                                      }
-
-                                      cleanParts.add(trimmedPart);
-                                    }
-
-                                    if (cleanParts.isNotEmpty) {
-                                      String cleanHouseDetail = cleanParts.join(
-                                        ', ',
-                                      );
-                                      finalAddress =
-                                          "$cleanHouseDetail, $_addressText";
-                                    }
+                                  if (rawAddressLower.contains(partLower) ||
+                                      rawAddressLower.contains(cleanPartLower)) {
+                                    continue;
                                   }
-                                  Navigator.pop(context, {
-                                    'address': finalAddress,
-                                    'lat': _currCenter.latitude,
-                                    'lng': _currCenter.longitude,
-                                  });
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: AppRadius.medium,
-                            ),
-                          ),
-                          child: Text(
-                            "Xác nhận",
-                            style: AppTextStyles.button.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
+
+
+                                  cleanParts.add(trimmedPart);
+                                }
+
+
+                                if (cleanParts.isNotEmpty) {
+                                  String cleanHouseDetail = cleanParts.join(', ');
+                                  finalAddress = "$cleanHouseDetail, $_addressText";
+                                }
+                              }
+                              Navigator.pop(context, {
+                                'address': finalAddress,
+                                'lat': _currCenter.latitude,
+                                'lng': _currCenter.longitude,
+                              });
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppRadius.medium,
                         ),
-                      ],
+                      ),
+                      child: Text(
+                        "Xác nhận địa chỉ",
+                        style: AppTextStyles.button.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),

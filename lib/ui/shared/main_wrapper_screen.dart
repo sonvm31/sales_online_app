@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
@@ -6,8 +5,8 @@ import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/logic/notification/notification_controller.dart';
 import 'package:sales_online_app/ui/buyer/cart/cart_screen.dart';
-import 'package:sales_online_app/ui/shared/chat_list_screen.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
+import 'package:sales_online_app/ui/shared/temp_screen.dart';
 import 'package:sales_online_app/ui/shared/profile_screen.dart';
 
 class MainWrapperScreen extends StatefulWidget {
@@ -22,7 +21,6 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
   late final CartController _cartController;
   late final NotificationController _notificationController;
   int _currIndex = 0;
-  late final String _currentUserId;
 
   List<Widget> get _tabs => [
     HomeTab(
@@ -32,7 +30,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
       onTabSelected: _selectTab,
     ),
     CartScreen(controller: _cartController),
-    const ChatListScreen(),
+    const PlaceholderScreen(title: "Màn hình Tin nhắn"),
     ProfileScreen(controller: widget.controller), // Truyền controller vào đây
   ];
 
@@ -44,7 +42,6 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId = widget.controller.session?.userId?.toString() ?? "unknown_user";
     _cartController = CartController(userId: widget.controller.session?.userId);
     _notificationController = NotificationController(
       role: widget.controller.session?.role ?? 'BUYER',
@@ -101,7 +98,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
             label: 'Giỏ hàng',
           ),
           BottomNavigationBarItem(
-            icon: _ChatNavIcon(currentUserId: _currentUserId),
+            icon: Icon(CupertinoIcons.conversation_bubble),
             label: 'Tin nhắn',
           ),
           BottomNavigationBarItem(
@@ -131,46 +128,6 @@ class _CartNavIcon extends StatelessWidget {
       label: Text(count > 99 ? '99+' : '$count'),
       backgroundColor: Colors.red,
       child: icon,
-    );
-  }
-}
-
-class _ChatNavIcon extends StatelessWidget{
-  final String currentUserId;
-
-  const _ChatNavIcon({
-    required this.currentUserId
-});
-
-  @override
-  Widget build(BuildContext context){
-    const icon = Icon(CupertinoIcons.conversation_bubble);
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('chats')
-          .where('members', arrayContains: currentUserId)
-          .snapshots(),
-      builder: (context, snapshot){
-        if(!snapshot.hasData) return icon;
-
-        final int unreadCount = snapshot.data!.docs.where((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          final String lastSenderId = data['lastSenderId']?.toString() ?? "";
-          final bool hasUnread = data['hasUnread'] as bool? ?? false;
-          return hasUnread && (lastSenderId != currentUserId);
-        }).length;
-
-        if (unreadCount <= 0) {
-          return icon;
-        }
-
-        return Badge(
-          label: Text(unreadCount > 99 ? '99+' : '$unreadCount'),
-          backgroundColor: Colors.red,
-          child: icon,
-        );
-      },
     );
   }
 }

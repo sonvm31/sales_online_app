@@ -1,11 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
-import 'package:sales_online_app/ui/buyer/chat/chat_screen.dart';
 import 'package:sales_online_app/ui/buyer/home/widgets/product_card.dart';
 import 'package:sales_online_app/ui/buyer/product_detail/product_detail_screen.dart';
 
@@ -135,22 +132,7 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  void _navigateToChat() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ChatScreen(
-          receiverId: widget.shop.id.toString(),
-          receiverName: widget.shop.name,
-        ),
-      ),
-    );
-  }
-
   void _handleBottomNavigationTap(int index) {
-    if (index == 2) {
-      _navigateToChat();
-      return;
-    }
     widget.onTabSelected?.call(index);
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
@@ -182,9 +164,7 @@ class _ShopScreenState extends State<ShopScreen> {
           controller: _scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
-            SliverToBoxAdapter(
-              child: _ShopHeader(shop: widget.shop, onChatTap: _navigateToChat),
-            ),
+            SliverToBoxAdapter(child: _ShopHeader(shop: widget.shop)),
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -363,9 +343,8 @@ class _ShopCartNavIcon extends StatelessWidget {
 
 class _ShopHeader extends StatelessWidget {
   final ShopModel shop;
-  final VoidCallback onChatTap;
 
-  const _ShopHeader({required this.shop, required this.onChatTap});
+  const _ShopHeader({required this.shop});
 
   @override
   Widget build(BuildContext context) {
@@ -388,73 +367,45 @@ class _ShopHeader extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ShopAvatar(
-            avatarUrl: shop.avatarUrl,
-            shopName: shop.name,
-          ),
+          _ShopAvatar(avatarUrl: shop.avatarUrl, shopName: shop.name),
           AppSpacing.w16,
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  shop.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTextStyles.headingMedium.copyWith(
-                                    color: textColor,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                              AppSpacing.w8,
-                              IconButton(
-                                constraints: const BoxConstraints(),
-                                padding: EdgeInsets.zero,
-                                icon: Icon(
-                                  CupertinoIcons.conversation_bubble,
-                                  color: AppColors.primary,
-                                  size: 22.0.w,
-                                ),
-                                onPressed: onChatTap,
-                              ),
-                            ],
-                          ),
-                          AppSpacing.h4,
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.sm,
-                              vertical: AppSpacing.xs,
-                            ),
-                            decoration: BoxDecoration(
-                              color: (shop.isActive)
-                                  ? Colors.green.withValues(alpha: 0.12)
-                                  : borderColor,
-                              borderRadius: AppRadius.circular,
-                            ),
-                            child: Text(
-                              shop.isActive
-                                  ? 'Đang bán'
-                                  : 'Tạm nghỉ',
-                              style: AppTextStyles.caption.copyWith(
-                                color: shop.isActive
-                                    ? Colors.green.shade700
-                                    : mutedColor,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        shop.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.headingMedium.copyWith(
+                          color: textColor,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    AppSpacing.w8,
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: shop.isActive
+                            ? Colors.green.withValues(alpha: 0.12)
+                            : borderColor,
+                        borderRadius: AppRadius.circular,
+                      ),
+                      child: Text(
+                        shop.isActive ? 'Đang bán' : 'Tạm nghỉ',
+                        style: AppTextStyles.caption.copyWith(
+                          color: shop.isActive
+                              ? Colors.green.shade700
+                              : mutedColor,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],

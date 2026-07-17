@@ -123,14 +123,6 @@ class OrderSuccessScreen extends StatelessWidget {
                             value: summary.paymentMethod,
                           ),
                           _InfoRow(
-                            label: 'Tiền hàng',
-                            value: _formatPrice(summary.productAmount),
-                          ),
-                          _InfoRow(
-                            label: 'Phí vận chuyển',
-                            value: _formatPrice(summary.shippingFee),
-                          ),
-                          _InfoRow(
                             label: 'Tổng thanh toán',
                             value: _formatPrice(summary.totalAmount),
                             valueColor: AppColors.primary,

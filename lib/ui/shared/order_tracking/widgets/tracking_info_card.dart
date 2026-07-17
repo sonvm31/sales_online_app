@@ -44,10 +44,6 @@ class TrackingInfoCard extends StatelessWidget {
             maxLines: 3,
           ),
           TrackingInfoRow(
-            label: 'Phí vận chuyển',
-            value: '${order.shippingFee.toStringAsFixed(0)}đ',
-          ),
-          TrackingInfoRow(
             label: AppStrings.orderTrackingTotal,
             value: '${order.totalAmount.toStringAsFixed(0)}đ',
           ),

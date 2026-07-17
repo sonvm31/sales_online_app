@@ -9,7 +9,6 @@ class OrderSummaryCard extends StatelessWidget {
   final double totalProductPrice;
   final double shippingFee;
   final bool isCalculatingShipping;
-  final String? shippingErrorMessage;
 
   const OrderSummaryCard({
     super.key,
@@ -18,7 +17,6 @@ class OrderSummaryCard extends StatelessWidget {
     required this.totalProductPrice,
     required this.shippingFee,
     required this.isCalculatingShipping,
-    this.shippingErrorMessage,
   });
 
   @override
@@ -47,7 +45,7 @@ class OrderSummaryCard extends StatelessWidget {
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
           ),
           ...orderItems.map(
-            (item) => Padding(
+                (item) => Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,39 +117,22 @@ class OrderSummaryCard extends StatelessWidget {
               ),
               isCalculatingShipping
                   ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
-                    )
-                  : shippingErrorMessage != null
-                  ? Text(
-                      "Không thể tính",
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: AppColors.primary,
+                ),
+              )
                   : Text(
-                      "${shippingFee.toStringAsFixed(0)}đ",
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: isDark
-                            ? AppColors.textLight
-                            : AppColors.textDark,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                "${shippingFee.toStringAsFixed(0)}đ",
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: isDark ? AppColors.textLight : AppColors.textDark,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
-          if (shippingErrorMessage != null) ...[
-            SizedBox(height: AppSpacing.xs),
-            Text(
-              shippingErrorMessage!,
-              style: AppTextStyles.caption.copyWith(color: Colors.orange),
-            ),
-          ],
           Divider(
             height: AppSpacing.md,
             color: isDark ? AppColors.borderDark : AppColors.borderLight,

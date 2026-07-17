@@ -21,17 +21,18 @@ class OrderController extends ChangeNotifier {
 
   double shippingFee = 0.0;
   bool isCalculatingShipping = false;
-  String? shippingErrorMessage;
 
   bool isLoading = false;
   String? errMessage;
   int? lastCreatedOrderId;
 
-  double? get shopLatitude =>
-      orderItems.isNotEmpty ? orderItems.first.product.shop.latitude : null;
+  double get shopLatitude => orderItems.isNotEmpty
+      ? (orderItems.first.product.shop.latitude ?? 10.841200)
+      : 10.841200;
 
-  double? get shopLongitude =>
-      orderItems.isNotEmpty ? orderItems.first.product.shop.longitude : null;
+  double get shopLongitude => orderItems.isNotEmpty
+      ? (orderItems.first.product.shop.longitude ?? 106.809900)
+      : 106.809900;
   OrderController({required this.orderItems, this.authController}) {
     _initDynamicUserData();
     fetchShippingFee();
@@ -57,14 +58,13 @@ class OrderController extends ChangeNotifier {
   Future<void> fetchShippingFee() async {
     if (orderItems.isEmpty) return;
     isCalculatingShipping = true;
-    shippingErrorMessage = null;
     notifyListeners();
     try {
-      double? shopLat = shopLatitude;
-      double? shopLng = shopLongitude;
+      double shopLat = shopLatitude;
+      double shopLng = shopLongitude;
 
       final shopAddress = orderItems.first.product.shop.address;
-      if (shopAddress != null && shopAddress.trim().isNotEmpty) {
+      if (shopAddress!.isNotEmpty) {
         try {
           final dio = Dio();
           final response = await dio.get(
@@ -77,14 +77,10 @@ class OrderController extends ChangeNotifier {
               'countrycodes': 'vn',
             },
             options: Options(
-              headers: {
-                'User-Agent': 'SalesOnlineApp/1.0 (fuongduy@gmail.com)',
-              },
+              headers: {'User-Agent': 'SalesOnlineApp/1.0 (fuongduy@gmail.com)'},
             ),
           );
-          if (response.statusCode == 200 &&
-              response.data is List &&
-              (response.data as List).isNotEmpty) {
+          if (response.statusCode == 200 && response.data is List && (response.data as List).isNotEmpty) {
             final first = (response.data as List).first;
             shopLat = double.tryParse(first['lat'].toString()) ?? shopLat;
             shopLng = double.tryParse(first['lon'].toString()) ?? shopLng;
@@ -95,24 +91,15 @@ class OrderController extends ChangeNotifier {
         }
       }
 
-      if (!_hasValidLocation(shopLat, shopLng)) {
-        shippingFee = 0.0;
-        shippingErrorMessage =
-            'Shop chưa có địa chỉ hoặc tọa độ để tính phí vận chuyển.';
-        return;
-      }
-
       final fee = await _orderService.calculateShippingFee(
-        shopLat: shopLat!,
-        shopLng: shopLng!,
+        shopLat: shopLat,
+        shopLng: shopLng,
         userLat: latitude,
         userLng: longitude,
       );
       shippingFee = fee;
     } catch (e) {
       debugPrint("Lỗi tính phí vận chuyển: $e");
-      shippingFee = 0.0;
-      shippingErrorMessage = e.toString().replaceAll("Exception: ", "");
     } finally {
       isCalculatingShipping = false;
       notifyListeners();
@@ -139,12 +126,6 @@ class OrderController extends ChangeNotifier {
       return null;
     }
 
-    if (shippingErrorMessage != null) {
-      errMessage = shippingErrorMessage;
-      notifyListeners();
-      return null;
-    }
-
     isLoading = true;
     errMessage = null;
     notifyListeners();
@@ -161,7 +142,6 @@ class OrderController extends ChangeNotifier {
         'paymentMethod': selectedPaymentMethod,
         'latitude': latitude,
         'longitude': longitude,
-        'shippingFee': shippingFee,
       };
 
       final response = await _orderService.createOrder(requestBody);
@@ -223,15 +203,7 @@ class OrderController extends ChangeNotifier {
       items: orderItems,
       address: selectedAddress,
       paymentMethod: selectedPaymentMethod,
-      productAmount: totalProductPrice,
-      shippingFee: shippingFee,
       totalAmount: totalProductPrice + shippingFee,
     );
-  }
-
-  bool _hasValidLocation(double? lat, double? lng) {
-    if (lat == null || lng == null) return false;
-    if (!lat.isFinite || !lng.isFinite) return false;
-    return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
   }
 }

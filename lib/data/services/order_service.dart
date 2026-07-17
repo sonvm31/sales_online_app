@@ -161,7 +161,7 @@ class OrderService {
         },
       );
       if (response.statusCode == 200) {
-        return _parseShippingFee(response.data);
+        return double.tryParse(response.data.toString()) ?? 0.0;
       }
       throw Exception('Không thể tính phí ship từ máy chủ.');
     } on DioException catch (e) {
@@ -170,27 +170,5 @@ class OrderService {
     } catch (e) {
       throw Exception("Đã xảy ra lỗi ngoài dự kiến khi tính phí ship.");
     }
-  }
-
-  double _parseShippingFee(dynamic data) {
-    if (data is num) return data.toDouble();
-
-    if (data is String) {
-      return double.tryParse(data) ?? 0.0;
-    }
-
-    if (data is Map) {
-      final rawFee =
-          data['shippingFee'] ??
-          data['fee'] ??
-          data['totalFee'] ??
-          data['amount'] ??
-          data['data'];
-
-      if (rawFee is num) return rawFee.toDouble();
-      if (rawFee is String) return double.tryParse(rawFee) ?? 0.0;
-    }
-
-    return 0.0;
   }
 }

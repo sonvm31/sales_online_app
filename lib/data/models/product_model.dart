@@ -86,9 +86,9 @@ class ShopModel {
       description: (json['description'] as String?) ?? '',
       avatarUrl: (json['avatarUrl'] as String?) ?? '',
       isActive: (json['isActive'] as bool?) ?? false,
-      latitude: (json['latitude'] as num?)?.toDouble(),
-      longitude: (json['longitude'] as num?)?.toDouble(),
-      address: json['address'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 10.841200,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 106.809900,
+      address: (json['address'] as String?) ?? '',
     );
   }
 
@@ -99,9 +99,6 @@ class ShopModel {
       'description': description,
       'avatarUrl': avatarUrl,
       'isActive': isActive,
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
     };
   }
 }
