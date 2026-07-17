@@ -10,6 +10,7 @@ import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
 import 'package:sales_online_app/ui/seller/order_management_screen.dart';
 import 'package:sales_online_app/ui/seller/product_management_screen.dart';
 import 'package:sales_online_app/ui/seller/seller_report_screen.dart';
+import 'package:sales_online_app/ui/shared/request_support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final AuthController controller;
@@ -195,7 +196,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: CupertinoIcons.tickets,
                             iconColor: AppColors.primary,
                             title: 'Trung tâm hỗ trợ',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const RequestSupportScreen(
+                                    isSeller: true,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           Divider(
                             color: isDark
@@ -343,7 +352,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: CupertinoIcons.tickets,
                             iconColor: AppColors.primary,
                             title: 'Trung tâm hỗ trợ',
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const RequestSupportScreen(
+                                    isSeller: true,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                           Divider(
                             color: isDark
