@@ -12,6 +12,7 @@ class ProfileController extends ChangeNotifier {
   ShopModel? _sellerShop;
   bool _isLoadingShop = false;
   String? _shopErrorMessage;
+  bool _isRegisteringShop = false;
 
   ProfileController({required this.authController, ShopService? shopService})
     : _shopService = shopService ?? ShopService() {
@@ -24,8 +25,10 @@ class ProfileController extends ChangeNotifier {
   bool get isSellerMode => _isSellerMode;
   ShopModel? get sellerShop => _sellerShop;
   bool get isLoadingShop => _isLoadingShop;
+  bool get isRegisteringShop => _isRegisteringShop;
   String? get shopErrorMessage => _shopErrorMessage;
   int get shopId => _sellerShop?.id ?? 0;
+  bool get isSellerShopActive => _sellerShop?.isActive == true;
 
   String get displayName {
     final user = FirebaseAuth.instance.currentUser;
@@ -53,6 +56,54 @@ class ProfileController extends ChangeNotifier {
     loadSellerShop();
   }
 
+  Future<SellerApprovalStatus> checkSellerApproval() async {
+    await loadSellerShop();
+
+    if (_sellerShop == null || _sellerShop!.id <= 0) {
+      return SellerApprovalStatus.notFound;
+    }
+
+    if (_sellerShop!.isActive) {
+      _isSellerMode = true;
+      notifyListeners();
+      return SellerApprovalStatus.active;
+    }
+
+    return SellerApprovalStatus.inactive;
+  }
+
+  Future<void> registerShop({
+    required String name,
+    required String description,
+    required String address,
+    required double latitude,
+    required double longitude,
+    required String avatarUrl,
+  }) async {
+    final userId = authController.session?.userId;
+    if (userId == null || userId <= 0) {
+      throw Exception('Không xác định được tài khoản đăng ký shop.');
+    }
+
+    _isRegisteringShop = true;
+    notifyListeners();
+
+    try {
+      await _shopService.registerShop(
+        userId: userId,
+        name: name,
+        description: description,
+        address: address,
+        latitude: latitude,
+        longitude: longitude,
+        avatarUrl: avatarUrl,
+      );
+    } finally {
+      _isRegisteringShop = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadSellerShop() async {
     final userId = authController.session?.userId;
     if (userId == null || userId <= 0) {
@@ -69,6 +120,7 @@ class ProfileController extends ChangeNotifier {
     try {
       _sellerShop = await _shopService.fetchShopByOwner(userId);
     } catch (e) {
+      _sellerShop = null;
       _shopErrorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoadingShop = false;
@@ -76,3 +128,5 @@ class ProfileController extends ChangeNotifier {
     }
   }
 }
+
+enum SellerApprovalStatus { active, inactive, notFound }
