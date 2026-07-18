@@ -9,6 +9,9 @@ import 'package:sales_online_app/ui/buyer/cart/cart_screen.dart';
 import 'package:sales_online_app/ui/shared/chat_list_screen.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
 import 'package:sales_online_app/ui/shared/profile_screen.dart';
+import 'package:sales_online_app/main.dart';
+
+import 'package:sales_online_app/data/services/shop_service.dart';
 
 class MainWrapperScreen extends StatefulWidget {
   final AuthController controller; // Thêm dòng này
@@ -18,11 +21,12 @@ class MainWrapperScreen extends StatefulWidget {
   State<MainWrapperScreen> createState() => _MainWrapperScreen();
 }
 
-class _MainWrapperScreen extends State<MainWrapperScreen> {
+class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObserver {
   late final CartController _cartController;
   late final NotificationController _notificationController;
   int _currIndex = 0;
   late final String _currentUserId;
+  String? _presenceId;
 
   List<Widget> get _tabs => [
     HomeTab(
@@ -44,6 +48,7 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _currentUserId = widget.controller.session?.userId?.toString() ?? "unknown_user";
     _cartController = CartController(userId: widget.controller.session?.userId);
     _notificationController = NotificationController(
@@ -51,10 +56,57 @@ class _MainWrapperScreen extends State<MainWrapperScreen> {
     );
     _cartController.loadCart();
     _notificationController.initialize();
+    _setupPresence();
+  }
+
+  Future<void> _setupPresence() async {
+    final session = widget.controller.session;
+    if (session == null) return;
+
+    if (session.role.toUpperCase() == 'SELLER') {
+      try {
+        final shop = await ShopService().fetchShopByOwner(session.userId!);
+        _presenceId = shop.id.toString();
+      } catch (e) {
+        _presenceId = session.userId?.toString();
+      }
+    } else {
+      _presenceId = session.userId?.toString();
+    }
+
+    if (_presenceId != null) {
+      _updatePresence(true);
+    }
+  }
+
+  Future<void> _updatePresence(bool isOnline) async {
+    if (_presenceId == null) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('user_presence')
+          .doc(_presenceId!)
+          .set({
+        'isOnline': isOnline,
+        'lastActive': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint("Error updating presence: $e");
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _updatePresence(true);
+    } else {
+      _updatePresence(false);
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _updatePresence(false);
     _cartController.dispose();
     _notificationController.dispose();
     super.dispose();
@@ -135,30 +187,89 @@ class _CartNavIcon extends StatelessWidget {
   }
 }
 
-class _ChatNavIcon extends StatelessWidget{
+class _ChatNavIcon extends StatefulWidget {
   final String currentUserId;
 
   const _ChatNavIcon({
-    required this.currentUserId
-});
+    required this.currentUserId,
+  });
 
   @override
-  Widget build(BuildContext context){
+  State<_ChatNavIcon> createState() => _ChatNavIconState();
+}
+
+class _ChatNavIconState extends State<_ChatNavIcon> {
+  bool _isLoading = true;
+  String _resolvedUserId = "unknown_user";
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveChatUserId();
+  }
+
+  Future<void> _resolveChatUserId() async {
+    final session = authController.session;
+    if (session == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    final userId = session.userId;
+    if (userId == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+
+    if (session.role.toUpperCase() == 'SELLER') {
+      try {
+        final shop = await ShopService().fetchShopByOwner(userId);
+        if (mounted) {
+          setState(() {
+            _resolvedUserId = shop.id.toString();
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        debugPrint("Error resolving shopId for nav icon: $e");
+        if (mounted) {
+          setState(() {
+            _resolvedUserId = widget.currentUserId;
+            _isLoading = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _resolvedUserId = widget.currentUserId;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     const icon = Icon(CupertinoIcons.conversation_bubble);
+
+    if (_isLoading) {
+      return icon;
+    }
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('chats')
-          .where('members', arrayContains: currentUserId)
+          .where('members', arrayContains: _resolvedUserId)
           .snapshots(),
-      builder: (context, snapshot){
-        if(!snapshot.hasData) return icon;
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return icon;
 
         final int unreadCount = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
           final String lastSenderId = data['lastSenderId']?.toString() ?? "";
           final bool hasUnread = data['hasUnread'] as bool? ?? false;
-          return hasUnread && (lastSenderId != currentUserId);
+          return hasUnread && (lastSenderId != _resolvedUserId);
         }).length;
 
         if (unreadCount <= 0) {
