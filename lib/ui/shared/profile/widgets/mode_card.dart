@@ -6,15 +6,19 @@ class ModeCard extends StatelessWidget {
   final bool isDark;
   final Color cardColor;
   final Color textColor;
+  final String title;
+  final String statusLabel;
   final String currentMode;
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const ModeCard({
     super.key,
     required this.isDark,
     required this.cardColor,
     required this.textColor,
+    this.title = 'Chế độ hiển thị',
+    this.statusLabel = 'Đang dùng: ',
     required this.currentMode,
     required this.buttonText,
     required this.onPressed,
@@ -36,7 +40,7 @@ class ModeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Chế độ hiển thị',
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: AppTextStyles.headingMedium.copyWith(
@@ -46,10 +50,10 @@ class ModeCard extends StatelessWidget {
                 ),
                 AppSpacing.h8,
                 RichText(
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
-                    text: 'Đang dùng: ',
+                    text: '',
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: isDark
                           ? AppColors.textMutedDark
@@ -57,6 +61,7 @@ class ModeCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                     children: [
+                      TextSpan(text: statusLabel),
                       TextSpan(
                         text: currentMode,
                         style: AppTextStyles.bodyLarge.copyWith(
