@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/main.dart';
 
 class ChatInputField extends StatefulWidget{
   final String chatRoomId;
@@ -19,7 +20,7 @@ class ChatInputField extends StatefulWidget{
     required this.receiverId,
     required this.receiverName,
     required this.isDark
-});
+  });
 
   @override
   State<ChatInputField> createState() => _ChatInputFieldState();
@@ -35,10 +36,10 @@ class _ChatInputFieldState extends State<ChatInputField>{
     _messageController.clear();
 
     await FirebaseFirestore.instance
-    .collection('chats')
-    .doc(widget.chatRoomId)
-    .collection('messages')
-    .add({
+        .collection('chats')
+        .doc(widget.chatRoomId)
+        .collection('messages')
+        .add({
       'senderId': widget.currentUserId,
       'senderName': widget.currentUserName,
       'receiverId': widget.receiverId,
@@ -46,13 +47,18 @@ class _ChatInputFieldState extends State<ChatInputField>{
       'timestamp': FieldValue.serverTimestamp(),
     });
 
+    final bool isSeller = authController.session?.role == 'SELLER';
+    final String shopId = isSeller ? widget.currentUserId : widget.receiverId;
+    final String shopName = isSeller ? widget.currentUserName : widget.receiverName;
+    final String buyerName = isSeller ? widget.receiverName : widget.currentUserName;
+
     await FirebaseFirestore.instance.collection('chats').doc(widget.chatRoomId).set({
       'members': [widget.currentUserId, widget.receiverId],
       'lastMessage': text,
       'lastSenderId': widget.currentUserId,
-      'shopId': widget.receiverId,
-      'shopName': widget.receiverName,
-      'senderName': widget.currentUserName,
+      'shopId': shopId,
+      'shopName': shopName,
+      'senderName': buyerName,
       'lastTimestamp': FieldValue.serverTimestamp(),
       'hasUnread': true,
     }, SetOptions(merge: true));
@@ -78,8 +84,8 @@ class _ChatInputFieldState extends State<ChatInputField>{
               child: Container(
                 height: AppSpacing.xxl,
                 decoration: BoxDecoration(
-                  color: widget.isDark ? Colors.black26 : const Color(0xFFF3F4F6),
-                  borderRadius: AppRadius.xLarge
+                    color: widget.isDark ? Colors.black26 : const Color(0xFFF3F4F6),
+                    borderRadius: AppRadius.xLarge
                 ),
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: TextField(
