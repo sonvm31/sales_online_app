@@ -5,6 +5,7 @@ import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/category_service.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/data/services/product_line_service.dart';
+import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
 class ProductManagementScreen extends StatefulWidget {
   final int shopId;
@@ -314,22 +315,18 @@ class _ProductTile extends StatelessWidget {
               color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: product.imageUrl.isNotEmpty
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.network(
-                      product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, error, stackTrace) => const Icon(
-                        Icons.inventory_2_outlined,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  )
-                : const Icon(
-                    Icons.inventory_2_outlined,
-                    color: AppColors.primary,
-                  ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: AppImage(
+                imageData: product.imageUrl,
+                fit: BoxFit.cover,
+                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                errorWidget: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

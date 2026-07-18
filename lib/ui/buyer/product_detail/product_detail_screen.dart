@@ -4,6 +4,7 @@ import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
+import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -380,50 +381,33 @@ class _ProductImage extends StatelessWidget {
         ? AppColors.borderDark
         : AppColors.borderLight;
 
-    if (imageUrl.isEmpty) {
-      return _ImagePlaceholder(color: placeholderColor);
-    }
-
     return AspectRatio(
       aspectRatio: 1,
-      child: Image.network(
-        imageUrl,
+      child: AppImage(
+        imageData: imageUrl,
         width: double.infinity,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            color: placeholderColor,
-            alignment: Alignment.center,
-            child: const CircularProgressIndicator(
-              color: AppColors.primary,
-              strokeWidth: 2,
-            ),
-          );
-        },
-        errorBuilder: (_, _, _) => _ImagePlaceholder(color: placeholderColor),
+        backgroundColor: placeholderColor,
+        errorWidget: _ImagePlaceholderContent(color: placeholderColor),
       ),
     );
   }
 }
 
-class _ImagePlaceholder extends StatelessWidget {
+class _ImagePlaceholderContent extends StatelessWidget {
   final Color color;
 
-  const _ImagePlaceholder({required this.color});
+  const _ImagePlaceholderContent({required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: ColoredBox(
-        color: color,
-        child: const Center(
-          child: Icon(
-            Icons.image_not_supported_outlined,
-            color: Colors.grey,
-            size: 48,
-          ),
+    return ColoredBox(
+      color: color,
+      child: const Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: Colors.grey,
+          size: 48,
         ),
       ),
     );

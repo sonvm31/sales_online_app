@@ -3,6 +3,7 @@ import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/order_screen.dart';
+import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
 class CartScreen extends StatefulWidget {
   final CartController controller;
@@ -278,8 +279,10 @@ class _CartScreenState extends State<CartScreen> {
                   final dynamic orderResult = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          OrderScreen(selectedCartItems: selectedItems, cartController: controller,),
+                      builder: (context) => OrderScreen(
+                        selectedCartItems: selectedItems,
+                        cartController: controller,
+                      ),
                     ),
                   );
                   if (context.mounted) {
@@ -469,19 +472,15 @@ class _CartProductImage extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: imageUrl.isEmpty
-            ? ColoredBox(
-                color: placeholderColor,
-                child: const Icon(Icons.image_not_supported_outlined),
-              )
-            : Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => ColoredBox(
-                  color: placeholderColor,
-                  child: const Icon(Icons.image_not_supported_outlined),
-                ),
-              ),
+        child: AppImage(
+          imageData: imageUrl,
+          fit: BoxFit.cover,
+          backgroundColor: placeholderColor,
+          errorWidget: ColoredBox(
+            color: placeholderColor,
+            child: const Icon(Icons.image_not_supported_outlined),
+          ),
+        ),
       ),
     );
   }
