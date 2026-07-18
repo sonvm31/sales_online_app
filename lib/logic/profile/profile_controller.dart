@@ -17,18 +17,25 @@ class ProfileController extends ChangeNotifier {
   ProfileController({required this.authController, ShopService? shopService})
     : _shopService = shopService ?? ShopService() {
     _isSellerMode = authController.session?.role.toUpperCase() == 'SELLER';
-    if (_isSellerMode) {
-      loadSellerShop();
-    }
+    loadSellerShop();
   }
 
   bool get isSellerMode => _isSellerMode;
   ShopModel? get sellerShop => _sellerShop;
+  bool get hasSellerShop => _sellerShop != null && _sellerShop!.id > 0;
+  bool get isSellerAccount =>
+      authController.session?.role.toUpperCase() == 'SELLER';
   bool get isLoadingShop => _isLoadingShop;
   bool get isRegisteringShop => _isRegisteringShop;
   String? get shopErrorMessage => _shopErrorMessage;
   int get shopId => _sellerShop?.id ?? 0;
   bool get isSellerShopActive => _sellerShop?.isActive == true;
+  ShopRegistrationState get shopRegistrationState {
+    if (!hasSellerShop) return ShopRegistrationState.notRegistered;
+    if (isSellerShopActive) return ShopRegistrationState.active;
+    if (isSellerAccount) return ShopRegistrationState.locked;
+    return ShopRegistrationState.pending;
+  }
 
   String get displayName {
     final user = FirebaseAuth.instance.currentUser;
@@ -130,3 +137,5 @@ class ProfileController extends ChangeNotifier {
 }
 
 enum SellerApprovalStatus { active, inactive, notFound }
+
+enum ShopRegistrationState { notRegistered, pending, active, locked }

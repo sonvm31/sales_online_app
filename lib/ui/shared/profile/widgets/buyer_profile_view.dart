@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/logic/profile/profile_controller.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/buyer_header.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/menu_option.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/mode_card.dart';
@@ -9,8 +10,12 @@ import 'package:sales_online_app/ui/shared/profile/widgets/profile_card.dart';
 
 class BuyerProfileView extends StatelessWidget {
   final String displayName;
+  final ShopRegistrationState shopRegistrationState;
+  final bool isLoadingShop;
   final bool isDarkThemeEnabled;
   final VoidCallback onRegisterShop;
+  final VoidCallback onSwitchToSeller;
+  final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
   final void Function({required String title, String? statusFilter})
@@ -19,8 +24,12 @@ class BuyerProfileView extends StatelessWidget {
   const BuyerProfileView({
     super.key,
     required this.displayName,
+    required this.shopRegistrationState,
+    required this.isLoadingShop,
     required this.isDarkThemeEnabled,
     required this.onRegisterShop,
+    required this.onSwitchToSeller,
+    required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
     required this.onOpenOrders,
@@ -61,9 +70,9 @@ class BuyerProfileView extends StatelessWidget {
                       textColor: textColor,
                       title: 'Kênh người bán',
                       statusLabel: '',
-                      currentMode: 'Đăng ký shop để bắt đầu bán hàng',
-                      buttonText: 'Bắt đầu bán hàng',
-                      onPressed: onRegisterShop,
+                      currentMode: _sellerModeDescription,
+                      buttonText: _sellerModeButtonText,
+                      onPressed: _sellerModeAction,
                     ),
                     AppSpacing.h24,
                     _SectionTitle(text: 'ĐƠN MUA CỦA TÔI', color: textColor),
@@ -111,6 +120,7 @@ class BuyerProfileView extends StatelessWidget {
                       cardColor: cardColor,
                       textColor: textColor,
                       isDarkThemeEnabled: isDarkThemeEnabled,
+                      onOpenSupportCenter: onOpenSupportCenter,
                       onToggleTheme: onToggleTheme,
                       onLogout: onLogout,
                     ),
@@ -123,6 +133,40 @@ class BuyerProfileView extends StatelessWidget {
       ),
     );
   }
+
+  String get _sellerModeDescription {
+    if (isLoadingShop) return 'Đang kiểm tra trạng thái shop...';
+
+    return switch (shopRegistrationState) {
+      ShopRegistrationState.notRegistered => 'Đăng ký shop để bắt đầu bán hàng',
+      ShopRegistrationState.pending => 'Đăng ký shop đang chờ admin duyệt',
+      ShopRegistrationState.active => 'Shop đã được duyệt',
+      ShopRegistrationState.locked =>
+        'Shop đang bị khóa, vui lòng liên hệ hỗ trợ',
+    };
+  }
+
+  String get _sellerModeButtonText {
+    if (isLoadingShop) return 'Đang tải';
+
+    return switch (shopRegistrationState) {
+      ShopRegistrationState.notRegistered => 'Bắt đầu bán hàng',
+      ShopRegistrationState.pending => 'Chờ duyệt',
+      ShopRegistrationState.active => 'Chuyển sang SELLER',
+      ShopRegistrationState.locked => 'Liên hệ hỗ trợ',
+    };
+  }
+
+  VoidCallback? get _sellerModeAction {
+    if (isLoadingShop) return null;
+
+    return switch (shopRegistrationState) {
+      ShopRegistrationState.notRegistered => onRegisterShop,
+      ShopRegistrationState.pending => null,
+      ShopRegistrationState.active => onSwitchToSeller,
+      ShopRegistrationState.locked => onOpenSupportCenter,
+    };
+  }
 }
 
 class _UtilityCard extends StatelessWidget {
@@ -130,6 +174,7 @@ class _UtilityCard extends StatelessWidget {
   final Color cardColor;
   final Color textColor;
   final bool isDarkThemeEnabled;
+  final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
 
@@ -138,6 +183,7 @@ class _UtilityCard extends StatelessWidget {
     required this.cardColor,
     required this.textColor,
     required this.isDarkThemeEnabled,
+    required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
   });
@@ -153,7 +199,7 @@ class _UtilityCard extends StatelessWidget {
             icon: CupertinoIcons.tickets,
             iconColor: AppColors.primary,
             title: 'Trung tâm hỗ trợ',
-            onTap: () {},
+            onTap: onOpenSupportCenter,
           ),
           Divider(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,

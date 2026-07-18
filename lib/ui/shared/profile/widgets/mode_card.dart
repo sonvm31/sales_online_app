@@ -10,7 +10,7 @@ class ModeCard extends StatelessWidget {
   final String statusLabel;
   final String currentMode;
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const ModeCard({
     super.key,
@@ -50,7 +50,7 @@ class ModeCard extends StatelessWidget {
                 ),
                 AppSpacing.h8,
                 RichText(
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     text: '',

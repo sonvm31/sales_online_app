@@ -119,6 +119,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (registered == true && mounted) {
+      await _controller.loadSellerShop();
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           behavior: SnackBarBehavior.floating,
@@ -126,6 +128,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
     }
+  }
+
+  void _openSupportCenter() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Text('Vui lòng liên hệ Trung tâm hỗ trợ để được xử lý shop.'),
+      ),
+    );
   }
 
   Future<void> _checkSellerApproval() async {
@@ -181,8 +192,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         } else {
           profileView = BuyerProfileView(
             displayName: _controller.displayName,
+            shopRegistrationState: _controller.shopRegistrationState,
+            isLoadingShop: _controller.isLoadingShop,
             isDarkThemeEnabled: themeProvider.currTheme == ThemeMode.dark,
             onRegisterShop: _openShopRegistration,
+            onSwitchToSeller: _controller.switchToSeller,
+            onOpenSupportCenter: _openSupportCenter,
             onToggleTheme: themeProvider.toggleTheme,
             onLogout: _logout,
             onOpenOrders: _openBuyerOrders,
