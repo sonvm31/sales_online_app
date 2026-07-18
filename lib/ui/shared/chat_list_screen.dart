@@ -3,15 +3,82 @@ import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/ui/buyer/chat/widgets/chat_room_card.dart';
+import 'package:sales_online_app/data/services/shop_service.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
+  bool _isLoading = true;
+  String _resolvedUserId = "unknown_user";
+  String _resolvedUserName = "Người dùng";
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveUserChatInfo();
+  }
+
+  Future<void> _resolveUserChatInfo() async {
+    final session = authController.session;
+    if (session == null) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    final userId = session.userId;
+    if (userId == null) {
+      if (mounted) {
+        setState(() {
+          _resolvedUserId = "unknown_user";
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    if (session.role.toUpperCase() == 'SELLER') {
+      try {
+        final shop = await ShopService().fetchShopByOwner(userId);
+        if (mounted) {
+          setState(() {
+            _resolvedUserId = shop.id.toString();
+            _resolvedUserName = shop.name;
+            _isLoading = false;
+          });
+        }
+      } catch (e) {
+        debugPrint("Error fetching shop info for chat: $e");
+        if (mounted) {
+          setState(() {
+            _resolvedUserId = userId.toString();
+            _resolvedUserName = session.fullName ?? "Người bán";
+            _isLoading = false;
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _resolvedUserId = userId.toString();
+          _resolvedUserName = session.fullName ?? "Khách hàng";
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final currentUserId =
-        authController.session?.userId?.toString() ?? "unknown_user";
 
     return Scaffold(
       backgroundColor: isDark
@@ -24,17 +91,20 @@ class ChatListScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         centerTitle: true,
         backgroundColor: isDark
             ? AppColors.surfaceDark
             : AppColors.surfaceLight,
         elevation: 0,
       ),
-      body: StreamBuilder<QuerySnapshot>(
+      body: _isLoading
+          ? const Center(
+        child: CircularProgressIndicator(color: AppColors.primary),
+      )
+          : StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
-            .where('members', arrayContains: currentUserId)
+            .where('members', arrayContains: _resolvedUserId)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -77,7 +147,8 @@ class ChatListScreen extends StatelessWidget {
               return ChatRoomCard(
                 roomData: chatRooms[index].data() as Map<String, dynamic>,
                 roomId: chatRooms[index].id,
-                currentUserId: currentUserId,
+                currentUserId: _resolvedUserId,
+                currentUserName: _resolvedUserName,
                 isDark: isDark,
               );
             },

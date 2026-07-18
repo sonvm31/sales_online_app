@@ -26,59 +26,87 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final senderBorderRadius = BorderRadius.only(
+      topLeft: Radius.circular(16.0.r),
+      topRight: Radius.circular(16.0.r),
+      bottomLeft: Radius.circular(16.0.r),
+      bottomRight: Radius.circular(4.0.r),
+    );
+
+    final receiverBorderRadius = BorderRadius.only(
+      topLeft: Radius.circular(16.0.r),
+      topRight: Radius.circular(16.0.r),
+      bottomLeft: Radius.circular(4.0.r),
+      bottomRight: Radius.circular(16.0.r),
+    );
+
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        padding: EdgeInsets.symmetric(vertical: 4.0.h),
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.md,
+            horizontal: 14.0.w,
+            vertical: 10.0.h,
           ),
           constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.7,
+            maxWidth: MediaQuery.of(context).size.width * 0.72,
           ),
           decoration: BoxDecoration(
+            gradient: isMe
+                ? const LinearGradient(
+              colors: [
+                AppColors.primary,
+                Color(0xFF5A5DF0), // Beautiful modern indigo gradient
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            )
+                : null,
             color: isMe
-                ? AppColors.primary
-                : (isDark ? Colors.grey.shade800 : Colors.white),
-            borderRadius: AppRadius.medium,
+                ? null
+                : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+            borderRadius: isMe ? senderBorderRadius : receiverBorderRadius,
             boxShadow: isMe
-                ? []
+                ? [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                blurRadius: 8.r,
+                offset: Offset(0, 3.h),
+              ),
+            ]
                 : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.02),
-                      blurRadius: 4.0.r,
-                      offset: Offset(0, 2.0.h),
-                    ),
-                  ],
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.015),
+                blurRadius: 4.r,
+                offset: Offset(0, 2.h),
+              ),
+            ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  message,
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    color: isMe
-                        ? Colors.white
-                        : (isDark ? AppColors.textLight : AppColors.textDark),
-                    height: 1.35,
-                  ),
+              Text(
+                message,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: isMe
+                      ? Colors.white
+                      : (isDark ? AppColors.textLight : AppColors.textDark),
+                  height: 1.4,
+                  fontSize: 14.5.sp,
                 ),
               ),
-              SizedBox(child: AppSpacing.h4),
+              const SizedBox(height: 4),
               Text(
                 _formatChatTime(timestamp),
                 style: AppTextStyles.caption.copyWith(
                   color: isMe
-                      ? AppColors.whitePlaceholder
+                      ? Colors.white.withValues(alpha: 0.65)
                       : (isDark
-                            ? AppColors.textMutedDark
-                            : AppColors.textMutedLight),
-                  fontSize: 10.0.sp,
+                      ? AppColors.textMutedDark
+                      : AppColors.textMutedLight),
+                  fontSize: 9.5.sp,
                 ),
               ),
             ],
