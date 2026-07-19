@@ -4,6 +4,7 @@ import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/data/models/order_summary_model.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/shared/order_tracking_screen.dart';
+import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
 class OrderSuccessScreen extends StatelessWidget {
   final OrderSummaryModel summary;
@@ -324,19 +325,12 @@ class _OrderItemTile extends StatelessWidget {
             child: SizedBox(
               width: 58,
               height: 58,
-              child: item.product.imageUrl.isEmpty
-                  ? const ColoredBox(
-                      color: AppColors.borderLight,
-                      child: Icon(Icons.image_not_supported_outlined),
-                    )
-                  : Image.network(
-                      item.product.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const ColoredBox(
-                        color: AppColors.borderLight,
-                        child: Icon(Icons.image_not_supported_outlined),
-                      ),
-                    ),
+              child: AppImage(
+                imageData: item.product.imageUrl,
+                fit: BoxFit.cover,
+                backgroundColor: AppColors.borderLight,
+                errorWidget: const _OrderItemImagePlaceholder(),
+              ),
             ),
           ),
           AppSpacing.w16,
@@ -371,6 +365,18 @@ class _OrderItemTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _OrderItemImagePlaceholder extends StatelessWidget {
+  const _OrderItemImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ColoredBox(
+      color: AppColors.borderLight,
+      child: Center(child: Icon(Icons.image_not_supported_outlined)),
     );
   }
 }

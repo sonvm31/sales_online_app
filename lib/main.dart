@@ -9,6 +9,7 @@ import 'package:sales_online_app/firebase_options.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/shared/auth/auth_gate.dart';
 import 'package:sales_online_app/ui/shared/auth/password_reset_link_handler.dart';
+import 'package:sales_online_app/core/config/cloudinary_config.dart';
 
 late final ThemeProvider themeProvider;
 late final AuthController authController;
@@ -16,6 +17,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  CloudinaryConfig.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   themeProvider = ThemeProvider();
