@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
+import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -30,39 +31,20 @@ class ProductCard extends StatelessWidget {
                 margin: EdgeInsets.all(AppSpacing.sm),
                 clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(borderRadius: AppRadius.large),
-                child: Image.network(
-                  product.imageUrl,
+                child: AppImage(
+                  imageData: product.imageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: isDark
-                          ? AppColors.borderDark
-                          : AppColors.borderLight,
-                      child: const Center(
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: isDark
-                          ? AppColors.borderDark
-                          : AppColors.borderLight,
-                      child: const Center(
-                        child: Icon(
-                          Icons.image_not_supported_outlined,
-                          color: Colors.grey,
-                          size: 28,
-                        ),
-                      ),
-                    );
-                  },
+                  backgroundColor: isDark
+                      ? AppColors.borderDark
+                      : AppColors.borderLight,
+                  errorWidget: const Center(
+                    child: Icon(
+                      Icons.image_not_supported_outlined,
+                      color: Colors.grey,
+                      size: 28,
+                    ),
+                  ),
                 ),
               ),
             ),
