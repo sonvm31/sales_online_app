@@ -10,6 +10,7 @@ import 'package:sales_online_app/ui/shared/profile/widgets/shop_preview_button.d
 
 class SellerProfileView extends StatelessWidget {
   final String shopName;
+  final bool isShopActive;
   final bool isLoadingShop;
   final String? shopErrorMessage;
   final bool isDarkThemeEnabled;
@@ -25,6 +26,7 @@ class SellerProfileView extends StatelessWidget {
   const SellerProfileView({
     super.key,
     required this.shopName,
+    required this.isShopActive,
     required this.isLoadingShop,
     required this.shopErrorMessage,
     required this.isDarkThemeEnabled,
@@ -52,12 +54,13 @@ class SellerProfileView extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SellerHeader(
                 shopName: shopName,
+                isActive: isShopActive,
                 isLoading: isLoadingShop,
                 errorMessage: shopErrorMessage,
                 onRetry: onRetryShop,

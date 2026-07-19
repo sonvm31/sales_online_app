@@ -29,6 +29,36 @@ class ShopService {
     }
   }
 
+  Future<void> registerShop({
+    required int userId,
+    required String name,
+    required String description,
+    required String address,
+    required double latitude,
+    required double longitude,
+    required String avatarUrl,
+  }) async {
+    try {
+      await _dio.post(
+        '/shops/register',
+        data: <String, dynamic>{
+          'userId': userId,
+          'name': name,
+          'description': description,
+          'address': address,
+          'latitude': latitude,
+          'longitude': longitude,
+          'avatarUrl': avatarUrl,
+        },
+      );
+    } on DioException catch (error) {
+      throw Exception(_messageFromDio(error));
+    } catch (e) {
+      if (e is Exception) rethrow;
+      throw Exception('Không thể gửi đăng ký shop. Vui lòng thử lại.');
+    }
+  }
+
   ShopModel _parseShop(Map<String, dynamic> data) {
     final rawShop = data['data'] ?? data['shop'] ?? data;
     if (rawShop is Map<String, dynamic>) {
@@ -42,6 +72,11 @@ class ShopService {
 
   String _messageFromDio(DioException error) {
     final statusCode = error.response?.statusCode;
+    final responseData = error.response?.data;
+
+    if (responseData is Map && responseData['message'] != null) {
+      return responseData['message'].toString();
+    }
 
     if (statusCode == 404) {
       return 'Tài khoản này chưa có shop.';
@@ -53,6 +88,6 @@ class ShopService {
       return 'Không thể kết nối máy chủ.';
     }
 
-    return 'Không thể lấy thông tin shop ($statusCode).';
+    return 'Không thể xử lý yêu cầu shop ($statusCode).';
   }
 }
