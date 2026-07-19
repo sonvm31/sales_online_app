@@ -12,6 +12,7 @@ import 'package:sales_online_app/ui/seller/seller_report_screen.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/buyer_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/seller_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/shop_registration_dialog.dart';
+import 'package:sales_online_app/ui/shared/request_support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final AuthController controller;
@@ -131,10 +132,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openSupportCenter() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text('Vui lòng liên hệ Trung tâm hỗ trợ để được xử lý shop.'),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => RequestSupportScreen(
+          isSeller: _controller.isSellerMode,
+          userId: widget.controller.session?.userId,
+        ),
       ),
     );
   }
@@ -186,6 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onOpenOrders: _openOrderManagement,
             onOpenReport: _openSellerReport,
             onOpenShopPreview: _openShopView,
+            onOpenSupportCenter: _openSupportCenter,
             onToggleTheme: themeProvider.toggleTheme,
             onLogout: _logout,
           );

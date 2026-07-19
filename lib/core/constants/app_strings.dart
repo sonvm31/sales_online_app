@@ -25,4 +25,20 @@ class AppStrings {
   static const String orderStatusShipping = 'Đang giao hàng';
   static const String orderStatusDone = 'Hoàn tất';
   static const String orderStatusCancelled = 'Đã hủy';
+
+  static const String supportBuyerTitle = 'Hỗ trợ khách hàng';
+  static const String supportSellerTitle = 'Trung tâm hỗ trợ seller';
+  static const String supportNewRequest = 'Gửi yêu cầu mới';
+  static const String supportTitleHint = 'Tiêu đề hỗ trợ';
+  static const String supportContentHint = 'Mô tả chi tiết vấn đề của bạn...';
+  static const String supportSubmitButton = 'Gửi yêu cầu ngay';
+  static const String supportSubmitting = 'Đang gửi...';
+  static const String supportHistoryTitle = 'Lịch sử hỗ trợ';
+  static const String supportEmptyHistory = 'Bạn chưa có lịch sử hỗ trợ nào.';
+  static const String supportRetry = 'Thử lại';
+  static const String supportSubmitSuccess = 'Gửi yêu cầu hỗ trợ thành công!';
+  static const String supportResolved = 'Đã giải quyết';
+  static const String supportPending = 'Chờ xử lý';
+  static const String supportTicketCode = 'Mã:';
+  static const String supportAdminReply = 'Admin phản hồi:';
 }

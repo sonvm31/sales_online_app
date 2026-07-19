@@ -20,6 +20,7 @@ class SellerProfileView extends StatelessWidget {
   final VoidCallback onOpenOrders;
   final VoidCallback onOpenReport;
   final VoidCallback onOpenShopPreview;
+  final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
 
@@ -36,6 +37,7 @@ class SellerProfileView extends StatelessWidget {
     required this.onOpenOrders,
     required this.onOpenReport,
     required this.onOpenShopPreview,
+    required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
   });
@@ -130,6 +132,7 @@ class SellerProfileView extends StatelessWidget {
                       cardColor: cardColor,
                       textColor: textColor,
                       isDarkThemeEnabled: isDarkThemeEnabled,
+                      onOpenSupportCenter: onOpenSupportCenter,
                       onToggleTheme: onToggleTheme,
                       onLogout: onLogout,
                     ),
@@ -149,6 +152,7 @@ class _UtilityCard extends StatelessWidget {
   final Color cardColor;
   final Color textColor;
   final bool isDarkThemeEnabled;
+  final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
 
@@ -157,6 +161,7 @@ class _UtilityCard extends StatelessWidget {
     required this.cardColor,
     required this.textColor,
     required this.isDarkThemeEnabled,
+    required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
   });
@@ -172,7 +177,7 @@ class _UtilityCard extends StatelessWidget {
             icon: CupertinoIcons.tickets,
             iconColor: AppColors.primary,
             title: 'Trung tâm hỗ trợ',
-            onTap: () {},
+            onTap: onOpenSupportCenter,
           ),
           Divider(
             color: isDark ? AppColors.borderDark : AppColors.borderLight,
