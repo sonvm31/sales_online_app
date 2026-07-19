@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
+import 'package:sales_online_app/logic/profile/profile_controller.dart';
 import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/ui/buyer/order/buyer_orders_screen.dart';
 import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
@@ -12,6 +12,7 @@ import 'package:sales_online_app/ui/seller/seller_report_screen.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/buyer_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/seller_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/shop_registration_dialog.dart';
+import 'package:sales_online_app/ui/shared/request_support_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final AuthController controller;
@@ -23,12 +24,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late bool isSellerMode;
+  late final ProfileController _controller;
 
   @override
   void initState() {
     super.initState();
-    isSellerMode = widget.controller.session?.role.toUpperCase() == 'SELLER';
+    _controller = ProfileController(authController: widget.controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   bool _ensureShopReady() {
@@ -54,34 +61,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openProductManagement() {
+    if (!_ensureShopReady()) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ProductManagementScreen(
-          shopId: widget.controller.session?.userId ?? 0,
-          shopName: _shopName,
+          shopId: _controller.shopId,
+          shopName: _controller.shopName,
         ),
       ),
     );
   }
 
-  void _openShopView() {
-    final shop = ShopModel(
-      id: widget.controller.session?.userId ?? 0,
-      name: _shopName,
-      description: 'Giao diện cửa hàng người mua sẽ nhìn thấy.',
-      avatarUrl: '',
-      isActive: true,
+  void _openOrderManagement() {
+    if (!_ensureShopReady()) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderManagementScreen(shopId: _controller.shopId),
+      ),
     );
+  }
+
+  void _openSellerReport() {
+    if (!_ensureShopReady()) return;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SellerReportScreen(shopId: _controller.shopId),
+      ),
+    );
+  }
+
+  void _openShopView() {
+    if (!_ensureShopReady()) return;
+    final shop = _controller.sellerShop!;
 
     Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => ShopScreen(shop: shop)));
-  }
-
-  void _openSellerPlaceholder(String title) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => PlaceholderScreen(title: title)),
-    );
   }
 
   void _openBuyerOrders({required String title, String? statusFilter}) {
@@ -117,10 +132,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _openSupportCenter() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text('Vui lòng liên hệ Trung tâm hỗ trợ để được xử lý shop.'),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            RequestSupportScreen(isSeller: _controller.isSellerMode),
       ),
     );
   }

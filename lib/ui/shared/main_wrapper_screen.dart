@@ -1,26 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/data/services/shop_service.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/logic/notification/notification_controller.dart';
+import 'package:sales_online_app/main.dart';
 import 'package:sales_online_app/ui/buyer/cart/cart_screen.dart';
 import 'package:sales_online_app/ui/buyer/tabs/home_tab.dart';
-import 'package:sales_online_app/ui/shared/temp_screen.dart';
+import 'package:sales_online_app/ui/shared/chat_list_screen.dart';
 import 'package:sales_online_app/ui/shared/profile_screen.dart';
-import 'package:sales_online_app/main.dart';
-
-import 'package:sales_online_app/data/services/shop_service.dart';
 
 class MainWrapperScreen extends StatefulWidget {
-  final AuthController controller; // Thêm dòng này
+  final AuthController controller;
+
   const MainWrapperScreen({super.key, required this.controller});
 
   @override
   State<MainWrapperScreen> createState() => _MainWrapperScreen();
 }
 
-class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObserver {
+class _MainWrapperScreen extends State<MainWrapperScreen>
+    with WidgetsBindingObserver {
   late final CartController _cartController;
   late final NotificationController _notificationController;
   int _currIndex = 0;
@@ -34,8 +36,8 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
       onTabSelected: _selectTab,
     ),
     CartScreen(controller: _cartController),
-    const PlaceholderScreen(title: "Màn hình Tin nhắn"),
-    ProfileScreen(controller: widget.controller), // Truyền controller vào đây
+    const ChatListScreen(),
+    ProfileScreen(controller: widget.controller),
   ];
 
   void _selectTab(int index) {
@@ -58,21 +60,23 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
 
   Future<void> _setupPresence() async {
     final session = widget.controller.session;
-    if (session == null) return;
+    final userId = session?.userId;
+    if (session == null || userId == null) return;
 
     if (session.role.toUpperCase() == 'SELLER') {
       try {
-        final shop = await ShopService().fetchShopByOwner(session.userId!);
+        final shop = await ShopService().fetchShopByOwner(userId);
         _presenceId = shop.id.toString();
       } catch (e) {
-        _presenceId = session.userId?.toString();
+        debugPrint('Error resolving seller presence id: $e');
+        _presenceId = userId.toString();
       }
     } else {
-      _presenceId = session.userId?.toString();
+      _presenceId = userId.toString();
     }
 
     if (_presenceId != null) {
-      _updatePresence(true);
+      await _updatePresence(true);
     }
   }
 
@@ -83,11 +87,11 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
           .collection('user_presence')
           .doc(_presenceId!)
           .set({
-        'isOnline': isOnline,
-        'lastActive': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+            'isOnline': isOnline,
+            'lastActive': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
     } catch (e) {
-      debugPrint("Error updating presence: $e");
+      debugPrint('Error updating presence: $e');
     }
   }
 
@@ -136,9 +140,9 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
         iconSize: 24,
         onTap: _selectTab,
         items: [
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
-            label: "Trang chủ",
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
             icon: ListenableBuilder(
@@ -150,10 +154,14 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
             label: 'Giỏ hàng',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.conversation_bubble),
+            icon: _ChatNavIcon(
+              currentUserId:
+                  widget.controller.session?.userId?.toString() ??
+                  'unknown_user',
+            ),
             label: 'Tin nhắn',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(CupertinoIcons.person),
             label: 'Cá nhân',
           ),
@@ -187,9 +195,7 @@ class _CartNavIcon extends StatelessWidget {
 class _ChatNavIcon extends StatefulWidget {
   final String currentUserId;
 
-  const _ChatNavIcon({
-    required this.currentUserId,
-  });
+  const _ChatNavIcon({required this.currentUserId});
 
   @override
   State<_ChatNavIcon> createState() => _ChatNavIconState();
@@ -197,7 +203,7 @@ class _ChatNavIcon extends StatefulWidget {
 
 class _ChatNavIconState extends State<_ChatNavIcon> {
   bool _isLoading = true;
-  String _resolvedUserId = "unknown_user";
+  String _resolvedUserId = 'unknown_user';
 
   @override
   void initState() {
@@ -207,13 +213,8 @@ class _ChatNavIconState extends State<_ChatNavIcon> {
 
   Future<void> _resolveChatUserId() async {
     final session = authController.session;
-    if (session == null) {
-      if (mounted) setState(() => _isLoading = false);
-      return;
-    }
-
-    final userId = session.userId;
-    if (userId == null) {
+    final userId = session?.userId;
+    if (session == null || userId == null) {
       if (mounted) setState(() => _isLoading = false);
       return;
     }
@@ -228,7 +229,7 @@ class _ChatNavIconState extends State<_ChatNavIcon> {
           });
         }
       } catch (e) {
-        debugPrint("Error resolving shopId for nav icon: $e");
+        debugPrint('Error resolving shopId for chat nav icon: $e');
         if (mounted) {
           setState(() {
             _resolvedUserId = widget.currentUserId;
@@ -236,13 +237,14 @@ class _ChatNavIconState extends State<_ChatNavIcon> {
           });
         }
       }
-    } else {
-      if (mounted) {
-        setState(() {
-          _resolvedUserId = widget.currentUserId;
-          _isLoading = false;
-        });
-      }
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _resolvedUserId = widget.currentUserId;
+        _isLoading = false;
+      });
     }
   }
 
@@ -262,11 +264,11 @@ class _ChatNavIconState extends State<_ChatNavIcon> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) return icon;
 
-        final int unreadCount = snapshot.data!.docs.where((doc) {
+        final unreadCount = snapshot.data!.docs.where((doc) {
           final data = doc.data() as Map<String, dynamic>;
-          final String lastSenderId = data['lastSenderId']?.toString() ?? "";
-          final bool hasUnread = data['hasUnread'] as bool? ?? false;
-          return hasUnread && (lastSenderId != _resolvedUserId);
+          final lastSenderId = data['lastSenderId']?.toString() ?? '';
+          final hasUnread = data['hasUnread'] as bool? ?? false;
+          return hasUnread && lastSenderId != _resolvedUserId;
         }).length;
 
         if (unreadCount <= 0) {
