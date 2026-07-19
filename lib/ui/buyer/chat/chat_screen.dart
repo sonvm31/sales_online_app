@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
@@ -8,11 +9,15 @@ import 'package:sales_online_app/ui/buyer/chat/widgets/message_list_section.dart
 class ChatScreen extends StatefulWidget {
   final String receiverId;
   final String receiverName;
+  final String? currentUserId;
+  final String? currentUserName;
 
   const ChatScreen({
     super.key,
     required this.receiverId,
     required this.receiverName,
+    this.currentUserId,
+    this.currentUserName,
   });
 
   @override
@@ -27,9 +32,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _currentUserId =
+    _currentUserId = widget.currentUserId ??
         authController.session?.userId?.toString() ?? "unknown_user";
-    _currentUserName = authController.session?.fullName ?? "Khách hàng";
+    _currentUserName = widget.currentUserName ??
+        authController.session?.fullName ?? "Khách hàng";
     _chatRoomId = _getChatRoomId(_currentUserId, widget.receiverId);
   }
 
@@ -93,25 +99,38 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: isDark ? AppColors.textLight : AppColors.textDark,
                     ),
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 6.0.w,
-                        height: 6.0.h,
-                        decoration: const BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      AppSpacing.w4,
-                      Text(
-                        "Đang online",
-                        style: AppTextStyles.caption.copyWith(
-                          color: textMutedColor,
-                          fontSize: 11.0.sp,
-                        ),
-                      ),
-                    ],
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('user_presence')
+                        .doc(widget.receiverId)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      bool isOnline = false;
+                      if (snapshot.hasData && snapshot.data!.exists) {
+                        final data = snapshot.data!.data() as Map<String, dynamic>?;
+                        isOnline = data?['isOnline'] as bool? ?? false;
+                      }
+                      return Row(
+                        children: [
+                          Container(
+                            width: 6.0.w,
+                            height: 6.0.h,
+                            decoration: BoxDecoration(
+                              color: isOnline ? Colors.green : Colors.grey,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          AppSpacing.w4,
+                          Text(
+                            isOnline ? "Đang hoạt động" : "Ngoại tuyến",
+                            style: AppTextStyles.caption.copyWith(
+                              color: textMutedColor,
+                              fontSize: 11.0.sp,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),

@@ -16,6 +16,35 @@ class MessageListSection extends StatelessWidget {
     required this.isDark,
   });
 
+  Widget _buildTimeDivider(Timestamp timestamp, bool isDark) {
+    final DateTime dateTime = timestamp.toDate().toLocal();
+    final DateTime now = DateTime.now();
+    String formattedTime = "";
+
+    if (dateTime.day == now.day && dateTime.month == now.month && dateTime.year == now.year) {
+      formattedTime = "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+    } else if (dateTime.day == now.day - 1 && dateTime.month == now.month && dateTime.year == now.year) {
+      formattedTime = "Hôm qua ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+    } else {
+      formattedTime = "${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Text(
+          formattedTime,
+          style: TextStyle(
+            color: isDark ? AppColors.textMutedDark : AppColors.textMutedLight,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -42,12 +71,37 @@ class MessageListSection extends StatelessWidget {
             final bool isMe = data['senderId'] == currentUserId;
             final Timestamp? serverTimestamp = data['timestamp'] as Timestamp?;
 
-            return MessageBubble(
-              message: data['message'] as String? ?? '',
-              timestamp: serverTimestamp,
-              isMe: isMe,
-              isDark: isDark
+            bool showTimeDivider = false;
+            if (index == docs.length - 1) {
+              showTimeDivider = true;
+            } else {
+              final nextData = docs[index + 1].data() as Map<String, dynamic>;
+              final Timestamp? nextTimestamp = nextData['timestamp'] as Timestamp?;
+              if (serverTimestamp != null && nextTimestamp != null) {
+                final diff = serverTimestamp.toDate().difference(nextTimestamp.toDate()).inMinutes.abs();
+                if (diff >= 10) {
+                  showTimeDivider = true;
+                }
+              }
+            }
+
+            final bubble = MessageBubble(
+                message: data['message'] as String? ?? '',
+                timestamp: serverTimestamp,
+                isMe: isMe,
+                isDark: isDark
             );
+
+            if (showTimeDivider && serverTimestamp != null) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTimeDivider(serverTimestamp, isDark),
+                  bubble,
+                ],
+              );
+            }
+            return bubble;
           },
         );
       },

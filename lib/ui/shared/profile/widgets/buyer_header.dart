@@ -12,11 +12,12 @@ class BuyerHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
+      height: 188,
       padding: EdgeInsets.fromLTRB(
         AppSpacing.lg,
-        AppSpacing.xxl,
-        AppSpacing.lg,
         AppSpacing.xl,
+        AppSpacing.lg,
+        AppSpacing.lg,
       ),
       decoration: BoxDecoration(
         color: AppColors.primary,
@@ -28,11 +29,11 @@ class BuyerHeader extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            radius: 42,
+            radius: 46,
             backgroundColor: AppColors.surfaceLight,
             child: Text(
               initial,
-              style: AppTextStyles.display.copyWith(
+              style: AppTextStyles.headingLarge.copyWith(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w900,
               ),
@@ -41,6 +42,7 @@ class BuyerHeader extends StatelessWidget {
           AppSpacing.w16,
           Expanded(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -50,6 +52,7 @@ class BuyerHeader extends StatelessWidget {
                   style: AppTextStyles.headingLarge.copyWith(
                     color: AppColors.textLight,
                     fontWeight: FontWeight.w900,
+                    height: 1.05,
                   ),
                 ),
                 AppSpacing.h8,
@@ -66,6 +69,7 @@ class BuyerHeader extends StatelessWidget {
                       style: AppTextStyles.bodyMedium.copyWith(
                         color: AppColors.textLight,
                         fontWeight: FontWeight.w700,
+                        height: 1.1,
                       ),
                     ),
                   ],
