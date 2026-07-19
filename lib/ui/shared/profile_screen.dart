@@ -134,8 +134,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _openSupportCenter() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            RequestSupportScreen(isSeller: _controller.isSellerMode),
+        builder: (_) => RequestSupportScreen(
+          isSeller: _controller.isSellerMode,
+          userId: widget.controller.session?.userId,
+        ),
       ),
     );
   }
@@ -187,6 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onOpenOrders: _openOrderManagement,
             onOpenReport: _openSellerReport,
             onOpenShopPreview: _openShopView,
+            onOpenSupportCenter: _openSupportCenter,
             onToggleTheme: themeProvider.toggleTheme,
             onLogout: _logout,
           );
