@@ -154,7 +154,7 @@ class BuyerProfileView extends StatelessWidget {
 
     return switch (shopRegistrationState) {
       ShopRegistrationState.notRegistered => 'Bắt đầu bán hàng',
-      ShopRegistrationState.pending => 'Chờ duyệt',
+      ShopRegistrationState.pending => 'Chờ duyệt/Bị khóa',
       ShopRegistrationState.active => 'Chuyển sang SELLER',
       ShopRegistrationState.locked => 'Liên hệ hỗ trợ',
     };

@@ -26,7 +26,9 @@ class ProfileController extends ChangeNotifier {
     SellerRevenueService? revenueService,
   }) : _shopService = shopService ?? ShopService(),
        _revenueService = revenueService ?? SellerRevenueService() {
-    _isSellerMode = authController.session?.role.toUpperCase() == 'SELLER';
+    // A role alone is not enough to open the seller UI: the shop can still be
+    // waiting for approval or be locked. Start in Buyer until its status loads.
+    _isSellerMode = false;
     loadSellerShop();
   }
 
@@ -89,6 +91,8 @@ class ProfileController extends ChangeNotifier {
       return SellerApprovalStatus.active;
     }
 
+    _isSellerMode = false;
+    notifyListeners();
     return SellerApprovalStatus.inactive;
   }
 
@@ -139,11 +143,13 @@ class ProfileController extends ChangeNotifier {
 
     try {
       _sellerShop = await _shopService.fetchShopByOwner(userId);
+      _isSellerMode = _sellerShop!.isActive && isSellerAccount;
       if (_isSellerMode && _sellerShop!.id > 0) {
         await loadRevenue(shopId: _sellerShop!.id);
       }
     } catch (e) {
       _sellerShop = null;
+      _isSellerMode = false;
       _shopErrorMessage = e.toString().replaceFirst('Exception: ', '');
       _sellerRevenue = null;
     } finally {

@@ -19,7 +19,12 @@ class AuthGate extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           case AuthStatus.authenticated:
-            return MainWrapperScreen(controller: controller);
+            // Recreate tab/profile state whenever another account is restored
+            // or signs in, so a previous seller mode cannot leak into buyer UI.
+            return MainWrapperScreen(
+              key: ValueKey('main-wrapper-${controller.session?.userId}'),
+              controller: controller,
+            );
           case AuthStatus.unauthenticated:
           case AuthStatus.authenticating:
             return LoginScreen(controller: controller);
