@@ -51,6 +51,41 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
     );
   }
 
+  Future<void> _confirmOrderReceived(OrderModel order) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xác nhận đã nhận hàng'),
+        content: const Text(
+          'Bạn xác nhận đã nhận đủ hàng? Đơn sẽ được hoàn tất và shop sẽ thấy xác nhận này.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Đã nhận hàng'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final success = await _controller.confirmOrderReceived(order);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Đã xác nhận nhận hàng. Shop sẽ thấy đơn đã hoàn tất.'
+              : _controller.errorMessage ?? 'Không thể xác nhận nhận hàng.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -85,6 +120,7 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
           return _BuyerOrdersBody(
             controller: _controller,
             onOpenTracking: _openTracking,
+            onConfirmOrderReceived: _confirmOrderReceived,
           );
         },
       ),
@@ -95,10 +131,12 @@ class _BuyerOrdersScreenState extends State<BuyerOrdersScreen> {
 class _BuyerOrdersBody extends StatelessWidget {
   final BuyerOrdersController controller;
   final ValueChanged<OrderModel> onOpenTracking;
+  final Future<void> Function(OrderModel) onConfirmOrderReceived;
 
   const _BuyerOrdersBody({
     required this.controller,
     required this.onOpenTracking,
+    required this.onConfirmOrderReceived,
   });
 
   @override
@@ -149,6 +187,8 @@ class _BuyerOrdersBody extends StatelessWidget {
             mutedColor: mutedColor,
             isDark: isDark,
             onTap: () => onOpenTracking(order),
+            isConfirmingReceipt: controller.isConfirmingReceipt(order.id),
+            onConfirmOrderReceived: () => onConfirmOrderReceived(order),
           );
         },
         separatorBuilder: (context, index) => const SizedBox(height: 12),
@@ -164,6 +204,8 @@ class _BuyerOrderCard extends StatelessWidget {
   final Color mutedColor;
   final bool isDark;
   final VoidCallback onTap;
+  final bool isConfirmingReceipt;
+  final Future<void> Function() onConfirmOrderReceived;
 
   const _BuyerOrderCard({
     required this.order,
@@ -171,6 +213,8 @@ class _BuyerOrderCard extends StatelessWidget {
     required this.mutedColor,
     required this.isDark,
     required this.onTap,
+    required this.isConfirmingReceipt,
+    required this.onConfirmOrderReceived,
   });
 
   @override
@@ -261,6 +305,30 @@ class _BuyerOrderCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (order.status.toUpperCase() == 'SHIPPING') ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: isConfirmingReceipt
+                        ? null
+                        : onConfirmOrderReceived,
+                    icon: isConfirmingReceipt
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.inventory_2_outlined),
+                    label: Text(
+                      isConfirmingReceipt ? 'Đang xác nhận...' : 'Đã nhận hàng',
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

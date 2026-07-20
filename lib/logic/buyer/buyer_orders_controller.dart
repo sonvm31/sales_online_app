@@ -9,6 +9,7 @@ class BuyerOrdersController extends ChangeNotifier {
 
   List<OrderModel> _orders = const <OrderModel>[];
   bool _isLoading = false;
+  int? _confirmingOrderId;
   String? _errorMessage;
 
   BuyerOrdersController({
@@ -20,6 +21,7 @@ class BuyerOrdersController extends ChangeNotifier {
   List<OrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  bool isConfirmingReceipt(int orderId) => _confirmingOrderId == orderId;
 
   Future<void> loadOrders() async {
     final currentUserId = userId;
@@ -48,6 +50,37 @@ class BuyerOrdersController extends ChangeNotifier {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> confirmOrderReceived(OrderModel order) async {
+    if (order.status.toUpperCase() != 'SHIPPING') {
+      _errorMessage = 'Chỉ có thể xác nhận khi đơn hàng đang giao.';
+      notifyListeners();
+      return false;
+    }
+
+    _confirmingOrderId = order.id;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final updated = await _orderService.confirmOrderReceived(orderId: order.id);
+      final normalizedFilter = statusFilter?.toUpperCase();
+      if (normalizedFilter == 'SHIPPING') {
+        _orders = _orders.where((item) => item.id != order.id).toList();
+      } else {
+        _orders = [
+          for (final item in _orders) if (item.id == order.id) updated else item,
+        ];
+      }
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _confirmingOrderId = null;
       notifyListeners();
     }
   }
