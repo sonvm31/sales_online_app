@@ -26,13 +26,15 @@ class EditProfileController extends ChangeNotifier {
   Future<bool> save({
     required String fullName,
     required String phone,
-    required String address,
     required String shopName,
     required String shopDescription,
     required String shopAvatarUrl,
     String? selectedShopAddress,
     double? selectedLatitude,
     double? selectedLongitude,
+    String? selectedDeliveryAddress,
+    double? selectedDeliveryLatitude,
+    double? selectedDeliveryLongitude,
   }) async {
     final userId = _authController.session?.userId;
     if (userId == null || userId <= 0) {
@@ -44,7 +46,7 @@ class EditProfileController extends ChangeNotifier {
     final request = UpdateProfileRequest(
       fullName: _changedValue(fullName, _authController.session?.fullName),
       phone: _changedValue(phone, _authController.session?.phone),
-      address: _newValue(address),
+      address: selectedDeliveryAddress,
       shopName: _changedValue(shopName, _shop?.name),
       shopDescription: _changedValue(shopDescription, _shop?.description),
       shopAvatarUrl: _changedValue(shopAvatarUrl, _shop?.avatarUrl),
@@ -68,6 +70,9 @@ class EditProfileController extends ChangeNotifier {
       await _authController.updateSessionProfile(
         fullName: request.fullName,
         phone: request.phone,
+        address: selectedDeliveryAddress,
+        deliveryLatitude: selectedDeliveryLatitude,
+        deliveryLongitude: selectedDeliveryLongitude,
       );
       return true;
     } catch (error) {
@@ -86,10 +91,5 @@ class EditProfileController extends ChangeNotifier {
       return null;
     }
     return normalizedValue;
-  }
-
-  String? _newValue(String value) {
-    final normalizedValue = value.trim();
-    return normalizedValue.isEmpty ? null : normalizedValue;
   }
 }

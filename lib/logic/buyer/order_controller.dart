@@ -16,8 +16,8 @@ class OrderController extends ChangeNotifier {
   String selectedAddress = "Chưa chọn địa chỉ";
   String selectedPaymentMethod = "COD";
 
-  double latitude = 10.841200;
-  double longitude = 106.809900;
+  double? latitude;
+  double? longitude;
 
   double shippingFee = 0.0;
   bool isCalculatingShipping = false;
@@ -39,7 +39,17 @@ class OrderController extends ChangeNotifier {
 
   void _initDynamicUserData() {
     if (authController != null && authController!.session != null) {
-      userId = authController!.session!.userId;
+      final session = authController!.session!;
+      userId = session.userId;
+      if (session.address?.trim().isNotEmpty == true &&
+          _hasValidLocation(
+            session.deliveryLatitude,
+            session.deliveryLongitude,
+          )) {
+        selectedAddress = session.address!.trim();
+        latitude = session.deliveryLatitude;
+        longitude = session.deliveryLongitude;
+      }
       debugPrint("Đã bốc thành công User ID số từ AuthSession: $userId");
     }
   }
@@ -56,6 +66,13 @@ class OrderController extends ChangeNotifier {
 
   Future<void> fetchShippingFee() async {
     if (orderItems.isEmpty) return;
+    if (!_hasValidLocation(latitude, longitude)) {
+      shippingFee = 0.0;
+      shippingErrorMessage =
+          'Vui lòng chọn địa chỉ giao hàng trên bản đồ để tính phí vận chuyển.';
+      notifyListeners();
+      return;
+    }
     isCalculatingShipping = true;
     shippingErrorMessage = null;
     notifyListeners();
@@ -105,8 +122,8 @@ class OrderController extends ChangeNotifier {
       final fee = await _orderService.calculateShippingFee(
         shopLat: shopLat!,
         shopLng: shopLng!,
-        userLat: latitude,
-        userLng: longitude,
+        userLat: latitude!,
+        userLng: longitude!,
       );
       shippingFee = fee;
     } catch (e) {

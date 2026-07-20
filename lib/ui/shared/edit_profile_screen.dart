@@ -26,7 +26,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final EditProfileController _controller;
   late final TextEditingController _fullNameController;
   late final TextEditingController _phoneController;
-  final _addressController = TextEditingController();
   late final TextEditingController _shopNameController;
   late final TextEditingController _shopDescriptionController;
   late final TextEditingController _shopAvatarUrlController;
@@ -34,6 +33,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _selectedShopAddress;
   double? _selectedLatitude;
   double? _selectedLongitude;
+  String? _selectedDeliveryAddress;
+  double? _selectedDeliveryLatitude;
+  double? _selectedDeliveryLongitude;
 
   bool get _canEditShop => widget.isSeller && widget.sellerShop != null;
 
@@ -66,7 +68,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _controller.dispose();
     _fullNameController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
     _shopNameController.dispose();
     _shopDescriptionController.dispose();
     _shopAvatarUrlController.dispose();
@@ -94,17 +95,40 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
+  Future<void> _pickDeliveryAddress() async {
+    final result = await Navigator.of(context).push<Map<String, dynamic>>(
+      MaterialPageRoute(builder: (_) => const MapPickerScreen()),
+    );
+    if (result == null || !mounted) return;
+
+    final address = result['address']?.toString();
+    final latitude = (result['lat'] as num?)?.toDouble();
+    final longitude = (result['lng'] as num?)?.toDouble();
+    if (address == null || latitude == null || longitude == null) {
+      _showMessage('Không thể lấy tọa độ từ địa chỉ đã chọn.');
+      return;
+    }
+
+    setState(() {
+      _selectedDeliveryAddress = address;
+      _selectedDeliveryLatitude = latitude;
+      _selectedDeliveryLongitude = longitude;
+    });
+  }
+
   Future<void> _save() async {
     final saved = await _controller.save(
       fullName: _fullNameController.text,
       phone: _phoneController.text,
-      address: _addressController.text,
       shopName: _shopNameController.text,
       shopDescription: _shopDescriptionController.text,
       shopAvatarUrl: _shopAvatarUrlController.text,
       selectedShopAddress: _selectedShopAddress,
       selectedLatitude: _selectedLatitude,
       selectedLongitude: _selectedLongitude,
+      selectedDeliveryAddress: _selectedDeliveryAddress,
+      selectedDeliveryLatitude: _selectedDeliveryLatitude,
+      selectedDeliveryLongitude: _selectedDeliveryLongitude,
     );
     if (!mounted) return;
 
@@ -161,11 +185,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     keyboardType: TextInputType.phone,
                   ),
                   AppSpacing.h16,
-                  _ProfileInput(
-                    controller: _addressController,
-                    label: AppStrings.profileAddress,
-                    hint: 'Nhập địa chỉ giao hàng mặc định',
-                    maxLines: 2,
+                  _DeliveryAddressPicker(
+                    address:
+                        _selectedDeliveryAddress ??
+                        widget.authController.session?.address,
+                    onTap: _pickDeliveryAddress,
                   ),
                 ],
               ),
@@ -195,10 +219,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     _ShopAddressPicker(
                       address:
                           _selectedShopAddress ?? widget.sellerShop?.address,
-                      latitude:
-                          _selectedLatitude ?? widget.sellerShop?.latitude,
-                      longitude:
-                          _selectedLongitude ?? widget.sellerShop?.longitude,
                       onTap: _pickShopAddress,
                     ),
                   ],
@@ -257,14 +277,12 @@ class _SectionCard extends StatelessWidget {
 class _ProfileInput extends StatelessWidget {
   final TextEditingController controller;
   final String label;
-  final String? hint;
   final int maxLines;
   final TextInputType? keyboardType;
 
   const _ProfileInput({
     required this.controller,
     required this.label,
-    this.hint,
     this.maxLines = 1,
     this.keyboardType,
   });
@@ -275,21 +293,48 @@ class _ProfileInput extends StatelessWidget {
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
-      decoration: InputDecoration(labelText: label, hintText: hint),
+      decoration: InputDecoration(labelText: label),
+    );
+  }
+}
+
+class _DeliveryAddressPicker extends StatelessWidget {
+  final String? address;
+  final VoidCallback onTap;
+
+  const _DeliveryAddressPicker({
+    required this.address,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(Icons.location_on_outlined),
+      label: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(AppStrings.profileAddress),
+          Text(
+            address?.isNotEmpty == true
+                ? address!
+                : 'Chọn địa chỉ giao hàng trên bản đồ',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _ShopAddressPicker extends StatelessWidget {
   final String? address;
-  final double? latitude;
-  final double? longitude;
   final VoidCallback onTap;
 
   const _ShopAddressPicker({
     required this.address,
-    required this.latitude,
-    required this.longitude,
     required this.onTap,
   });
 
@@ -304,8 +349,6 @@ class _ShopAddressPicker extends StatelessWidget {
           const Text(AppStrings.profileChooseShopAddress),
           if (address != null && address!.isNotEmpty)
             Text(address!, maxLines: 2, overflow: TextOverflow.ellipsis),
-          if (latitude != null && longitude != null)
-            Text('Lat: $latitude, Lng: $longitude'),
         ],
       ),
     );

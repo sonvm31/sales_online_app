@@ -152,11 +152,23 @@ class AuthController extends ChangeNotifier {
     return false;
   }
 
-  Future<void> updateSessionProfile({String? fullName, String? phone}) async {
+  Future<void> updateSessionProfile({
+    String? fullName,
+    String? phone,
+    String? address,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
+  }) async {
     final currentSession = _session;
     if (currentSession == null) return;
 
-    _session = currentSession.copyWith(fullName: fullName, phone: phone);
+    _session = currentSession.copyWith(
+      fullName: fullName,
+      phone: phone,
+      address: address,
+      deliveryLatitude: deliveryLatitude,
+      deliveryLongitude: deliveryLongitude,
+    );
     await _sessionService.save(_session!);
     notifyListeners();
   }
