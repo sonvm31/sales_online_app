@@ -123,6 +123,12 @@ class OrderService {
     }
   }
 
+  /// Buyer confirms a delivered order. `DONE` is reserved for this action in
+  /// the mobile app so sellers can reliably identify buyer-confirmed orders.
+  Future<OrderModel> confirmOrderReceived({required int orderId}) {
+    return updateOrderStatus(orderId: orderId, status: 'DONE');
+  }
+
   List<OrderModel> _parseOrders(dynamic data) {
     if (data is List) {
       return data

@@ -51,6 +51,41 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         : AppStrings.orderTrackingBuyerTitle;
   }
 
+  Future<void> _confirmOrderReceived() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Xác nhận đã nhận hàng'),
+        content: const Text(
+          'Bạn xác nhận đã nhận đủ hàng? Đơn sẽ được hoàn tất và shop sẽ thấy xác nhận này.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Hủy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Đã nhận hàng'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final success = await _controller.confirmOrderReceived();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Đã xác nhận nhận hàng. Shop sẽ thấy đơn đã hoàn tất.'
+              : _controller.errorMessage ?? 'Không thể xác nhận nhận hàng.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -81,7 +116,11 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       body: ListenableBuilder(
         listenable: _controller,
         builder: (context, child) {
-          return _OrderTrackingBody(controller: _controller, role: widget.role);
+          return _OrderTrackingBody(
+            controller: _controller,
+            role: widget.role,
+            onConfirmOrderReceived: _confirmOrderReceived,
+          );
         },
       ),
     );
@@ -91,8 +130,13 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 class _OrderTrackingBody extends StatelessWidget {
   final OrderTrackingController controller;
   final OrderTrackingRole role;
+  final Future<void> Function() onConfirmOrderReceived;
 
-  const _OrderTrackingBody({required this.controller, required this.role});
+  const _OrderTrackingBody({
+    required this.controller,
+    required this.role,
+    required this.onConfirmOrderReceived,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +177,30 @@ class _OrderTrackingBody extends StatelessWidget {
           TrackingStatusCard(order: order, role: role),
           AppSpacing.h16,
           TrackingInfoCard(order: order, role: role),
+          if (role == OrderTrackingRole.buyer &&
+              order.status.toUpperCase() == 'SHIPPING') ...[
+            AppSpacing.h16,
+            FilledButton.icon(
+              onPressed: controller.isConfirmingReceipt
+                  ? null
+                  : onConfirmOrderReceived,
+              icon: controller.isConfirmingReceipt
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.inventory_2_outlined),
+              label: Text(
+                controller.isConfirmingReceipt
+                    ? 'Đang xác nhận...'
+                    : 'Đã nhận hàng',
+              ),
+            ),
+          ],
         ],
       ),
     );

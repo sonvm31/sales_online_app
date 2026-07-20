@@ -15,6 +15,7 @@ class OrderTrackingController extends ChangeNotifier {
   LatLng? _buyerLocation;
   bool _isLoading = true;
   bool _isRouteLoading = false;
+  bool _isConfirmingReceipt = false;
   String? _errorMessage;
 
   OrderTrackingController({
@@ -30,6 +31,7 @@ class OrderTrackingController extends ChangeNotifier {
   LatLng? get buyerLocation => _buyerLocation;
   bool get isLoading => _isLoading;
   bool get isRouteLoading => _isRouteLoading;
+  bool get isConfirmingReceipt => _isConfirmingReceipt;
   String? get errorMessage => _errorMessage;
 
   Future<void> loadOrder() async {
@@ -72,6 +74,29 @@ class OrderTrackingController extends ChangeNotifier {
       );
     } finally {
       _isRouteLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> confirmOrderReceived() async {
+    final currentOrder = _order;
+    if (currentOrder == null || currentOrder.status.toUpperCase() != 'SHIPPING') {
+      _errorMessage = 'Chỉ có thể xác nhận khi đơn hàng đang giao.';
+      notifyListeners();
+      return false;
+    }
+
+    _isConfirmingReceipt = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      _order = await _orderService.confirmOrderReceived(orderId: currentOrder.id);
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      _isConfirmingReceipt = false;
       notifyListeners();
     }
   }

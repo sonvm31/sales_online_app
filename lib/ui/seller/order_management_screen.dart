@@ -279,20 +279,24 @@ class _OrderCardState extends State<_OrderCard> {
                   ),
                   DropdownButton<String>(
                     value: _selectedStatus,
-                    items: const [
-                      DropdownMenuItem(
+                    items: [
+                      const DropdownMenuItem(
                         value: 'PENDING',
                         child: Text('Đang chuẩn bị hàng'),
                       ),
-                      DropdownMenuItem(
+                      const DropdownMenuItem(
                         value: 'SHIPPING',
                         child: Text('Đang giao hàng'),
                       ),
-                      DropdownMenuItem(
+                      const DropdownMenuItem(
                         value: 'PAID',
                         child: Text('Đã thanh toán'),
                       ),
-                      DropdownMenuItem(value: 'DONE', child: Text('Hoàn tất')),
+                      if (widget.order.status.toUpperCase() == 'DONE')
+                        const DropdownMenuItem(
+                          value: 'DONE',
+                          child: Text('Buyer đã nhận hàng'),
+                        ),
                     ],
                     onChanged: (value) {
                       if (widget.isLocked) return;
@@ -340,6 +344,16 @@ class _OrderCardState extends State<_OrderCard> {
                   'Đơn hàng đã hủy, không thể thao tác.',
                   style: TextStyle(
                     color: OrderStatusHelper.color('CANCELLED'),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+              if (widget.order.status.toUpperCase() == 'DONE') ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Buyer đã xác nhận đã nhận hàng. Đơn đã hoàn tất.',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -570,23 +584,24 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                         DropdownButtonFormField<String>(
                           initialValue: _selectedStatus,
                           isExpanded: true,
-                          items: const [
-                            DropdownMenuItem(
+                          items: [
+                            const DropdownMenuItem(
                               value: 'PENDING',
                               child: Text('Đang chuẩn bị hàng'),
                             ),
-                            DropdownMenuItem(
+                            const DropdownMenuItem(
                               value: 'SHIPPING',
                               child: Text('Đang giao hàng'),
                             ),
-                            DropdownMenuItem(
+                            const DropdownMenuItem(
                               value: 'PAID',
                               child: Text('Đã thanh toán'),
                             ),
-                            DropdownMenuItem(
-                              value: 'DONE',
-                              child: Text('Hoàn tất'),
-                            ),
+                            if (_order!.status.toUpperCase() == 'DONE')
+                              const DropdownMenuItem(
+                                value: 'DONE',
+                                child: Text('Buyer đã nhận hàng'),
+                              ),
                           ],
                           onChanged: _order!.status.toUpperCase() == 'CANCELLED'
                               ? null
