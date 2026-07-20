@@ -16,4 +16,16 @@ class AuthSession {
     this.phone,
     required this.role,
   });
+
+  AuthSession copyWith({String? fullName, String? phone}) {
+    return AuthSession(
+      userId: userId,
+      accessToken: accessToken,
+      firebaseUid: firebaseUid,
+      fullName: fullName ?? this.fullName,
+      email: email,
+      phone: phone ?? this.phone,
+      role: role,
+    );
+  }
 }

@@ -15,6 +15,7 @@ class BuyerProfileView extends StatelessWidget {
   final bool isDarkThemeEnabled;
   final VoidCallback onRegisterShop;
   final VoidCallback onSwitchToSeller;
+  final VoidCallback onEditProfile;
   final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
@@ -29,6 +30,7 @@ class BuyerProfileView extends StatelessWidget {
     required this.isDarkThemeEnabled,
     required this.onRegisterShop,
     required this.onSwitchToSeller,
+    required this.onEditProfile,
     required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
@@ -120,6 +122,7 @@ class BuyerProfileView extends StatelessWidget {
                       cardColor: cardColor,
                       textColor: textColor,
                       isDarkThemeEnabled: isDarkThemeEnabled,
+                      onEditProfile: onEditProfile,
                       onOpenSupportCenter: onOpenSupportCenter,
                       onToggleTheme: onToggleTheme,
                       onLogout: onLogout,
@@ -174,6 +177,7 @@ class _UtilityCard extends StatelessWidget {
   final Color cardColor;
   final Color textColor;
   final bool isDarkThemeEnabled;
+  final VoidCallback onEditProfile;
   final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
@@ -183,6 +187,7 @@ class _UtilityCard extends StatelessWidget {
     required this.cardColor,
     required this.textColor,
     required this.isDarkThemeEnabled,
+    required this.onEditProfile,
     required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
@@ -195,6 +200,16 @@ class _UtilityCard extends StatelessWidget {
       color: cardColor,
       child: Column(
         children: [
+          MenuOption(
+            icon: CupertinoIcons.person_crop_circle,
+            iconColor: AppColors.primary,
+            title: 'Cập nhật hồ sơ',
+            onTap: onEditProfile,
+          ),
+          Divider(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            height: 20,
+          ),
           MenuOption(
             icon: CupertinoIcons.tickets,
             iconColor: AppColors.primary,

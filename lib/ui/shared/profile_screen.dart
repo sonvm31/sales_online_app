@@ -8,11 +8,11 @@ import 'package:sales_online_app/ui/buyer/order/buyer_orders_screen.dart';
 import 'package:sales_online_app/ui/buyer/shop/shop_screen.dart';
 import 'package:sales_online_app/ui/seller/order_management_screen.dart';
 import 'package:sales_online_app/ui/seller/product_management_screen.dart';
-import 'package:sales_online_app/ui/seller/seller_report_screen.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/buyer_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/seller_profile_view.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/shop_registration_dialog.dart';
 import 'package:sales_online_app/ui/shared/request_support_screen.dart';
+import 'package:sales_online_app/ui/shared/edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final AuthController controller;
@@ -81,15 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _openSellerReport() {
-    if (!_ensureShopReady()) return;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => SellerReportScreen(shopId: _controller.shopId),
-      ),
-    );
-  }
-
   void _openShopView() {
     if (!_ensureShopReady()) return;
     final shop = _controller.sellerShop!;
@@ -142,6 +133,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _openEditProfile() async {
+    final updated = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => EditProfileScreen(
+          authController: widget.controller,
+          isSeller: _controller.hasSellerShop,
+          sellerShop: _controller.sellerShop,
+        ),
+      ),
+    );
+
+    if (updated == true && mounted) {
+      await _controller.loadSellerShop();
+      setState(() {});
+    }
+  }
+
   Future<void> _checkSellerApproval() async {
     final status = await _controller.checkSellerApproval();
     if (!mounted) return;
@@ -187,11 +195,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onSwitchToBuyer: _controller.switchToBuyer,
             onOpenProducts: _openProductManagement,
             onOpenOrders: _openOrderManagement,
-            onOpenReport: _openSellerReport,
             onOpenShopPreview: _openShopView,
+            onEditProfile: _openEditProfile,
             onOpenSupportCenter: _openSupportCenter,
             onToggleTheme: themeProvider.toggleTheme,
             onLogout: _logout,
+            totalRevenue: _controller.totalRevenue,
+            isLoadingRevenue: _controller.isLoadingRevenue,
+            revenueErrorMessage: _controller.revenueErrorMessage,
+            onRetryRevenue: _controller.loadRevenue,
           );
         } else {
           profileView = BuyerProfileView(
@@ -201,6 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isDarkThemeEnabled: themeProvider.currTheme == ThemeMode.dark,
             onRegisterShop: _openShopRegistration,
             onSwitchToSeller: _controller.switchToSeller,
+            onEditProfile: _openEditProfile,
             onOpenSupportCenter: _openSupportCenter,
             onToggleTheme: themeProvider.toggleTheme,
             onLogout: _logout,
