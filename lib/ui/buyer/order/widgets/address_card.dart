@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/logic/auth/auth_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/map_picker_screen.dart';
+import 'package:sales_online_app/ui/shared/profile_screen.dart';
 
 class AddressCard extends StatelessWidget {
   final bool isDark;
   final String selectedAddress;
   final String userName;
   final String userPhone;
+  final AuthController authController;
   final Function(String address, double lat, double lng) onLocationPicked;
 
   const AddressCard({
@@ -17,14 +20,32 @@ class AddressCard extends StatelessWidget {
     required this.userName,
     required this.userPhone,
     required this.onLocationPicked,
+    required this.authController
   });
 
   @override
   Widget build(BuildContext context) {
     final bool hasAddress =
         selectedAddress.isNotEmpty && selectedAddress != "Chưa chọn địa chỉ";
+    final bool hasPhone = userPhone.isNotEmpty && userPhone.trim().toLowerCase() != "chưa có sđt";
     return GestureDetector(
       onTap: () async {
+        if (!hasPhone) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Vui lòng cập nhật số điện thoại trước khi đặt hàng!"),
+              backgroundColor: Colors.orange,
+            ),
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfileScreen(controller: authController),
+            ),
+          );
+          return;
+        }
         final Map<String, dynamic>? result =
             await Navigator.push<Map<String, dynamic>>(
               context,
