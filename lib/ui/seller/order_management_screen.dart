@@ -60,7 +60,10 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
   }
 
   Future<void> _saveInlineStatus(OrderModel order, String status) async {
-    if (order.status.toUpperCase() == 'CANCELLED') return;
+    final currentStatus = order.status.toUpperCase();
+    // 🟢 KHÓA: Nếu đơn đã HỦY hoặc ĐÃ HOÀN TẤT thì không cho lưu nữa
+    if (currentStatus == 'CANCELLED' || currentStatus == 'DONE') return;
+
     setState(() => _isSaving = true);
     try {
       await _orderService.updateOrderStatus(orderId: order.id, status: status);
@@ -191,13 +194,16 @@ class _OrderManagementScreenState extends State<OrderManagementScreen> {
 
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       itemBuilder: (context, index) {
         final order = _orders[index];
+        final statusUpper = order.status.toUpperCase();
+        final bool isLocked = statusUpper == 'CANCELLED' || statusUpper == 'DONE';
+
         return _OrderCard(
           order: order,
           isDark: isDark,
-          isLocked: order.status.toUpperCase() == 'CANCELLED',
+          isLocked: isLocked,
           onTap: () => _openDetail(order),
           onSaveStatus: (status) => _saveInlineStatus(order, status),
         );
@@ -234,7 +240,16 @@ class _OrderCardState extends State<_OrderCard> {
   @override
   void initState() {
     super.initState();
-    _selectedStatus = widget.order.status;
+    _selectedStatus = widget.order.status.toUpperCase();
+  }
+
+  @override
+  void didUpdateWidget(covariant _OrderCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.order.status != widget.order.status) {
+      _selectedStatus = widget.order.status.toUpperCase();
+      _dirty = false;
+    }
   }
 
   @override
@@ -266,6 +281,7 @@ class _OrderCardState extends State<_OrderCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
@@ -275,10 +291,59 @@ class _OrderCardState extends State<_OrderCard> {
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  DropdownButton<String>(
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 36,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: widget.isLocked
+                          ? null
+                          : _dirty
+                          ? () async {
+                        await widget.onSaveStatus(_selectedStatus);
+                        if (!mounted) return;
+                        setState(() => _dirty = false);
+                      }
+                          : null,
+                      child: const Text('Lưu'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: widget.isDark
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: widget.isDark
+                        ? AppColors.borderDark
+                        : const Color(0xFFE5E7EB),
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
                     value: _selectedStatus,
+                    isExpanded: true,
+                    icon: const Icon(Icons.arrow_drop_down_rounded),
+                    dropdownColor: widget.isDark
+                        ? AppColors.surfaceDark
+                        : Colors.white,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                     items: [
                       const DropdownMenuItem(
                         value: 'PENDING',
@@ -295,41 +360,33 @@ class _OrderCardState extends State<_OrderCard> {
                       if (widget.order.status.toUpperCase() == 'DONE')
                         const DropdownMenuItem(
                           value: 'DONE',
-                          child: Text('Buyer đã nhận hàng'),
+                          child: Text('Người nhận đã nhận hàng'),
                         ),
                     ],
-                    onChanged: (value) {
-                      if (widget.isLocked) return;
+                    // 🟢 Vô hiệu hóa Dropdown nếu widget.isLocked = true
+                    onChanged: widget.isLocked
+                        ? null
+                        : (value) {
                       if (value == null) return;
                       setState(() {
                         _selectedStatus = value;
                         _dirty =
                             _selectedStatus !=
-                            widget.order.status.toUpperCase();
+                                widget.order.status.toUpperCase();
                       });
                     },
                   ),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: widget.isLocked
-                        ? null
-                        : _dirty
-                        ? () async {
-                            await widget.onSaveStatus(_selectedStatus);
-                            if (!mounted) return;
-                            setState(() => _dirty = false);
-                          }
-                        : null,
-                    child: const Text('Lưu'),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 8),
+
+              const SizedBox(height: 12),
               Text(
                 widget.order.user.fullName.isNotEmpty
                     ? widget.order.user.fullName
                     : widget.order.user.email,
                 style: TextStyle(color: textColor, fontWeight: FontWeight.w700),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
               Text(
@@ -338,7 +395,7 @@ class _OrderCardState extends State<_OrderCard> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(color: mutedColor),
               ),
-              if (widget.isLocked) ...[
+              if (widget.order.status.toUpperCase() == 'CANCELLED') ...[
                 const SizedBox(height: 8),
                 Text(
                   'Đơn hàng đã hủy, không thể thao tác.',
@@ -351,14 +408,14 @@ class _OrderCardState extends State<_OrderCard> {
               if (widget.order.status.toUpperCase() == 'DONE') ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Buyer đã xác nhận đã nhận hàng. Đơn đã hoàn tất.',
+                  'Người nhận đã xác nhận nhận hàng. Đơn đã hoàn tất.',
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Container(
@@ -377,6 +434,7 @@ class _OrderCardState extends State<_OrderCard> {
                       style: TextStyle(
                         color: OrderStatusHelper.color(_selectedStatus),
                         fontWeight: FontWeight.w700,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -385,6 +443,7 @@ class _OrderCardState extends State<_OrderCard> {
                     CurrencyFormatter.vnd(widget.order.totalAmount),
                     style: TextStyle(
                       color: textColor,
+                      fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -447,10 +506,10 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
   Future<void> _saveStatus() async {
     final order = _order;
     final status = _selectedStatus;
-    if (order == null ||
-        status == null ||
-        status == order.status.toUpperCase() ||
-        order.status.toUpperCase() == 'CANCELLED') {
+    if (order == null || status == null) return;
+
+    final currentStatus = order.status.toUpperCase();
+    if (status == currentStatus || currentStatus == 'CANCELLED' || currentStatus == 'DONE') {
       return;
     }
 
@@ -463,7 +522,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
       if (!mounted) return;
       setState(() {
         _order = updated;
-        _selectedStatus = updated.status;
+        _selectedStatus = updated.status.toUpperCase();
       });
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -489,6 +548,9 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
     final mutedColor = isDark
         ? AppColors.textMutedDark
         : const Color(0xFF6B7280);
+
+    final currentStatus = _order?.status.toUpperCase() ?? '';
+    final bool isLocked = currentStatus == 'CANCELLED' || currentStatus == 'DONE';
 
     return Scaffold(
       backgroundColor: isDark
@@ -531,143 +593,153 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
               ),
             )
           else if (_order != null)
-            RefreshIndicator(
-              onRefresh: _loadDetail,
-              color: AppColors.primary,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(20),
-                children: [
-                  _DetailCard(
-                    title: 'Khách hàng',
-                    child: _DetailRow(
-                      label: _order!.user.fullName.isNotEmpty
-                          ? _order!.user.fullName
-                          : _order!.user.email,
-                      value: _order!.user.phone.isNotEmpty
-                          ? _order!.user.phone
-                          : _order!.user.address,
+              RefreshIndicator(
+                onRefresh: _loadDetail,
+                color: AppColors.primary,
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _DetailCard(
+                      title: 'Khách hàng',
+                      child: _DetailRow(
+                        label: _order!.user.fullName.isNotEmpty
+                            ? _order!.user.fullName
+                            : _order!.user.email,
+                        value: _order!.user.phone.isNotEmpty
+                            ? _order!.user.phone
+                            : _order!.user.address,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _DetailCard(
-                    title: 'Thông tin đơn',
-                    child: Column(
-                      children: [
-                        _DetailRow(label: 'Mã đơn', value: '#${_order!.id}'),
-                        _DetailRow(
-                          label: 'Thanh toán',
-                          value: _order!.paymentMethod,
-                        ),
-                        _DetailRow(
-                          label: 'Ngày tạo',
-                          value: _order!.createdAt == null
-                              ? '-'
-                              : _formatDateTime(_order!.createdAt!),
-                        ),
-                        _DetailRow(
-                          label: 'Phí ship',
-                          value: CurrencyFormatter.vnd(_order!.shippingFee),
-                        ),
-                        _DetailRow(
-                          label: 'Tổng tiền',
-                          value: CurrencyFormatter.vnd(_order!.totalAmount),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _DetailCard(
-                    title: 'Trạng thái',
-                    child: Column(
-                      children: [
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedStatus,
-                          isExpanded: true,
-                          items: [
-                            const DropdownMenuItem(
-                              value: 'PENDING',
-                              child: Text('Đang chuẩn bị hàng'),
-                            ),
-                            const DropdownMenuItem(
-                              value: 'SHIPPING',
-                              child: Text('Đang giao hàng'),
-                            ),
-                            const DropdownMenuItem(
-                              value: 'PAID',
-                              child: Text('Đã thanh toán'),
-                            ),
-                            if (_order!.status.toUpperCase() == 'DONE')
-                              const DropdownMenuItem(
-                                value: 'DONE',
-                                child: Text('Buyer đã nhận hàng'),
-                              ),
-                          ],
-                          onChanged: _order!.status.toUpperCase() == 'CANCELLED'
-                              ? null
-                              : (value) =>
-                                    setState(() => _selectedStatus = value),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed:
-                                _order!.status.toUpperCase() == 'CANCELLED'
-                                ? null
-                                : _selectedStatus ==
-                                      _order!.status.toUpperCase()
-                                ? null
-                                : _saveStatus,
-                            child: const Text('Lưu'),
+                    const SizedBox(height: 12),
+                    _DetailCard(
+                      title: 'Thông tin đơn',
+                      child: Column(
+                        children: [
+                          _DetailRow(label: 'Mã đơn', value: '#${_order!.id}'),
+                          _DetailRow(
+                            label: 'Thanh toán',
+                            value: _order!.paymentMethod,
                           ),
-                        ),
-                      ],
+                          _DetailRow(
+                            label: 'Ngày tạo',
+                            value: _order!.createdAt == null
+                                ? '-'
+                                : _formatDateTime(_order!.createdAt!),
+                          ),
+                          _DetailRow(
+                            label: 'Phí ship',
+                            value: CurrencyFormatter.vnd(_order!.shippingFee),
+                          ),
+                          _DetailRow(
+                            label: 'Tổng tiền',
+                            value: CurrencyFormatter.vnd(_order!.totalAmount),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _openTracking,
-                      icon: const Icon(Icons.map_outlined),
-                      label: const Text('Theo dõi giao hàng'),
+                    const SizedBox(height: 12),
+                    _DetailCard(
+                      title: 'Trạng thái',
+                      child: Column(
+                        children: [
+                          DropdownButtonFormField<String>(
+                            initialValue: _selectedStatus,
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            items: [
+                              const DropdownMenuItem(
+                                value: 'PENDING',
+                                child: Text('Đang chuẩn bị hàng'),
+                              ),
+                              const DropdownMenuItem(
+                                value: 'SHIPPING',
+                                child: Text('Đang giao hàng'),
+                              ),
+                              const DropdownMenuItem(
+                                value: 'PAID',
+                                child: Text('Đã thanh toán'),
+                              ),
+                              if (currentStatus == 'DONE')
+                                const DropdownMenuItem(
+                                  value: 'DONE',
+                                  child: Text('Người nhận đã nhận hàng'),
+                                ),
+                            ],
+                            // 🟢 Vô hiệu hóa Dropdown nếu đơn đã khóa (CANCELLED hoặc DONE)
+                            onChanged: isLocked
+                                ? null
+                                : (value) =>
+                                setState(() => _selectedStatus = value),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              // 🟢 Vô hiệu hóa Nút Lưu nếu đơn đã khóa
+                              onPressed: isLocked
+                                  ? null
+                                  : _selectedStatus == currentStatus
+                                  ? null
+                                  : _saveStatus,
+                              child: const Text('Lưu'),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  _DetailCard(
-                    title: 'Sản phẩm',
-                    child: Column(
-                      children: _order!.orderItems
-                          .map(
-                            (item) => Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      item.product.name,
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontWeight: FontWeight.w700,
-                                      ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _openTracking,
+                        icon: const Icon(Icons.map_outlined),
+                        label: const Text('Theo dõi giao hàng'),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _DetailCard(
+                      title: 'Sản phẩm',
+                      child: Column(
+                        children: _order!.orderItems
+                            .map(
+                              (item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    item.product.name,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
-                                  Text(
-                                    '${item.quantity} x ${CurrencyFormatter.vnd(item.price)}',
-                                    style: TextStyle(color: mutedColor),
-                                  ),
-                                ],
-                              ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${item.quantity} x ${CurrencyFormatter.vnd(item.price)}',
+                                  style: TextStyle(color: mutedColor),
+                                ),
+                              ],
                             ),
-                          )
-                          .toList(),
+                          ),
+                        )
+                            .toList(),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
           if (_isSaving)
             Positioned.fill(
               child: ColoredBox(
@@ -741,9 +813,15 @@ class _DetailRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 110,
-            child: Text(label, style: TextStyle(color: mutedColor)),
+            width: 100,
+            child: Text(
+              label,
+              style: TextStyle(color: mutedColor),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
