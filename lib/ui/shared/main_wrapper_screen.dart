@@ -21,7 +21,8 @@ class MainWrapperScreen extends StatefulWidget {
   State<MainWrapperScreen> createState() => _MainWrapperScreen();
 }
 
-class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObserver {
+class _MainWrapperScreen extends State<MainWrapperScreen>
+    with WidgetsBindingObserver {
   late final CartController _cartController;
   late final NotificationController _notificationController;
   int _currIndex = 0;
@@ -49,12 +50,14 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _currentUserId = widget.controller.session?.userId?.toString() ?? "unknown_user";
+    _currentUserId =
+        widget.controller.session?.userId?.toString() ?? "unknown_user";
     _cartController = CartController(userId: widget.controller.session?.userId);
     _notificationController = NotificationController(
       role: widget.controller.session?.role ?? 'BUYER',
     );
     _cartController.loadCart();
+    _cartController.loadOwnedShop();
     _notificationController.initialize();
     _setupPresence();
   }
@@ -86,9 +89,9 @@ class _MainWrapperScreen extends State<MainWrapperScreen> with WidgetsBindingObs
           .collection('user_presence')
           .doc(_presenceId!)
           .set({
-        'isOnline': isOnline,
-        'lastActive': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+            'isOnline': isOnline,
+            'lastActive': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
     } catch (e) {
       debugPrint("Error updating presence: $e");
     }
@@ -190,9 +193,7 @@ class _CartNavIcon extends StatelessWidget {
 class _ChatNavIcon extends StatefulWidget {
   final String currentUserId;
 
-  const _ChatNavIcon({
-    required this.currentUserId,
-  });
+  const _ChatNavIcon({required this.currentUserId});
 
   @override
   State<_ChatNavIcon> createState() => _ChatNavIconState();

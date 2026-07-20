@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/product_service.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
@@ -60,9 +61,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       return;
     }
 
+    if (cartController.isOwnShopProduct(product.shop.id)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bạn không thể mua sản phẩm của shop mình.'),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isAddingToCart = true);
     try {
-      await cartController.addToCart(productId: product.id);
+      await cartController.addToCart(
+        productId: product.id,
+        productShopId: product.shop.id,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -71,6 +84,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           behavior: SnackBarBehavior.floating,
         ),
       );
+    } on CartException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,11 +143,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             return _ProductErrorState(onRetry: _retry);
           }
 
-          return _ProductDetailContent(
-            product: snapshot.data!,
-            isAddingToCart: _isAddingToCart,
-            onAddToCart: () => _addToCart(snapshot.data!),
-            onViewShop: () => _openShop(snapshot.data!),
+          final product = snapshot.data!;
+          final cartController = widget.cartController;
+          if (cartController == null) {
+            return _ProductDetailContent(
+              product: product,
+              isAddingToCart: _isAddingToCart,
+              isOwnShopProduct: false,
+              onAddToCart: () => _addToCart(product),
+              onViewShop: () => _openShop(product),
+            );
+          }
+
+          return ListenableBuilder(
+            listenable: cartController,
+            builder: (context, child) => _ProductDetailContent(
+              product: product,
+              isAddingToCart: _isAddingToCart,
+              isOwnShopProduct: cartController.isOwnShopProduct(
+                product.shop.id,
+              ),
+              onAddToCart: () => _addToCart(product),
+              onViewShop: () => _openShop(product),
+            ),
           );
         },
       ),
@@ -140,12 +176,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 class _ProductDetailContent extends StatelessWidget {
   final ProductModel product;
   final bool isAddingToCart;
+  final bool isOwnShopProduct;
   final VoidCallback onAddToCart;
   final VoidCallback onViewShop;
 
   const _ProductDetailContent({
     required this.product,
     required this.isAddingToCart,
+    required this.isOwnShopProduct,
     required this.onAddToCart,
     required this.onViewShop,
   });
@@ -328,7 +366,9 @@ class _ProductDetailContent extends StatelessWidget {
               width: double.infinity,
               height: 56,
               child: FilledButton.icon(
-                onPressed: isAddingToCart ? null : onAddToCart,
+                onPressed: isAddingToCart || isOwnShopProduct
+                    ? null
+                    : onAddToCart,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   disabledBackgroundColor: AppColors.primary.withValues(
@@ -346,9 +386,17 @@ class _ProductDetailContent extends StatelessWidget {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Icon(Icons.add_shopping_cart_outlined),
+                    : Icon(
+                        isOwnShopProduct
+                            ? Icons.storefront_outlined
+                            : Icons.add_shopping_cart_outlined,
+                      ),
                 label: Text(
-                  isAddingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng',
+                  isAddingToCart
+                      ? 'Đang thêm...'
+                      : isOwnShopProduct
+                      ? 'Sản phẩm của shop bạn'
+                      : 'Thêm vào giỏ hàng',
                   style: AppTextStyles.button.copyWith(color: Colors.white),
                 ),
               ),
@@ -359,14 +407,9 @@ class _ProductDetailContent extends StatelessWidget {
     );
   }
 
-  String _formatPrice(double price) {
-    final value = price.toStringAsFixed(0);
-    final formatted = value.replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
-    return '$formattedđ';
-  }
+String _formatPrice(double price) {
+  return CurrencyFormatter.vnd(price);
+}
 }
 
 class _ProductImage extends StatelessWidget {
