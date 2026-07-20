@@ -94,6 +94,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                     lat: lat,
                                     lng: lng,
                                   ),
+                              authController: authController,
                             ),
                             AppSpacing.h16,
                             OrderSummaryCard(
