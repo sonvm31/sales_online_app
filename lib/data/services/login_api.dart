@@ -107,6 +107,7 @@ class LoginApi {
       fullName: data['fullName'] as String?,
       email: email is String && email.isNotEmpty ? email : fallbackEmail,
       phone: data['phone'] as String?,
+      address: data['address'] as String?,
       role: (data['role'] as String?) ?? 'BUYER',
     );
   }

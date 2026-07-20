@@ -8,6 +8,9 @@ class AuthSessionService {
   static const String _fullNameKey = 'auth_full_name';
   static const String _emailKey = 'auth_email';
   static const String _phoneKey = 'auth_phone';
+  static const String _addressKey = 'auth_address';
+  static const String _deliveryLatitudeKey = 'auth_delivery_latitude';
+  static const String _deliveryLongitudeKey = 'auth_delivery_longitude';
   static const String _roleKey = 'auth_role';
 
   Future<AuthSession?> read() async {
@@ -32,6 +35,9 @@ class AuthSessionService {
       fullName: prefs.getString(_fullNameKey),
       email: email,
       phone: prefs.getString(_phoneKey),
+      address: prefs.getString(_addressKey),
+      deliveryLatitude: prefs.getDouble(_deliveryLatitudeKey),
+      deliveryLongitude: prefs.getDouble(_deliveryLongitudeKey),
       role: prefs.getString(_roleKey) ?? 'BUYER',
     );
   }
@@ -55,6 +61,18 @@ class AuthSessionService {
         prefs.remove(_phoneKey)
       else
         prefs.setString(_phoneKey, session.phone!),
+      if (session.address == null)
+        prefs.remove(_addressKey)
+      else
+        prefs.setString(_addressKey, session.address!),
+      if (session.deliveryLatitude == null)
+        prefs.remove(_deliveryLatitudeKey)
+      else
+        prefs.setDouble(_deliveryLatitudeKey, session.deliveryLatitude!),
+      if (session.deliveryLongitude == null)
+        prefs.remove(_deliveryLongitudeKey)
+      else
+        prefs.setDouble(_deliveryLongitudeKey, session.deliveryLongitude!),
     ]);
   }
 
@@ -67,6 +85,9 @@ class AuthSessionService {
       prefs.remove(_fullNameKey),
       prefs.remove(_emailKey),
       prefs.remove(_phoneKey),
+      prefs.remove(_addressKey),
+      prefs.remove(_deliveryLatitudeKey),
+      prefs.remove(_deliveryLongitudeKey),
       prefs.remove(_roleKey),
     ]);
   }

@@ -41,4 +41,22 @@ class AppStrings {
   static const String supportPending = 'Chờ xử lý';
   static const String supportTicketCode = 'Mã:';
   static const String supportAdminReply = 'Admin phản hồi:';
+
+  static const String profileEditTitle = 'Cập nhật hồ sơ';
+  static const String profilePersonalSection = 'Thông tin cá nhân';
+  static const String profileShopSection = 'Thông tin shop';
+  static const String profileFullName = 'Họ và tên';
+  static const String profilePhone = 'Số điện thoại';
+  static const String profileAddress = 'Địa chỉ giao hàng';
+  static const String profileShopName = 'Tên shop';
+  static const String profileShopDescription = 'Mô tả shop';
+  static const String profileShopAvatarUrl = 'URL ảnh đại diện shop';
+  static const String profileChooseShopAddress =
+      'Chọn địa chỉ shop trên bản đồ';
+  static const String profileSave = 'Lưu thay đổi';
+  static const String profileSaveSuccess = 'Đã cập nhật hồ sơ.';
+
+  static const String sellerTotalRevenue = 'Tổng doanh thu';
+  static const String sellerRevenueDescription =
+      'Doanh thu được hệ thống ghi nhận';
 }

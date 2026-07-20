@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 import 'package:sales_online_app/logic/cart/cart_controller.dart';
 import 'package:sales_online_app/ui/buyer/order/order_screen.dart';
@@ -273,6 +274,14 @@ class _CartScreenState extends State<CartScreen> {
                 onSelectAllChanged: (value) =>
                     _toggleSelectAll(controller.items, value),
                 onOrder: () async {
+                  if (controller.containsOwnShopProducts(selectedItems)) {
+                    _showSnackBar(
+                      context,
+                      'Không thể đặt hàng sản phẩm của shop mình.',
+                    );
+                    return;
+                  }
+
                   final purchasedItemIds = selectedItems
                       .map((e) => e.id)
                       .toList();
@@ -790,10 +799,5 @@ class _CartErrorState extends StatelessWidget {
 }
 
 String _formatPrice(double price) {
-  final value = price.toStringAsFixed(0);
-  final formatted = value.replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (match) => '${match[1]}.',
-  );
-  return '$formattedđ';
+  return CurrencyFormatter.vnd(price);
 }

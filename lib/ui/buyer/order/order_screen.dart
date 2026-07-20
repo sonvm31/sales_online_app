@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
@@ -46,7 +45,7 @@ class _OrderScreenState extends State<OrderScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final user = FirebaseAuth.instance.currentUser;
+    final session = authController.session;
 
     return ListenableBuilder(
       listenable: _controller,
@@ -84,9 +83,8 @@ class _OrderScreenState extends State<OrderScreen> {
                             AddressCard(
                               isDark: isDark,
                               userName:
-                                  user?.displayName ?? "Chưa cập nhật tên",
-                              userPhone:
-                                  user?.phoneNumber ?? "Chưa cập nhật SĐT",
+                                  session?.fullName ?? "Chưa cập nhật tên",
+                              userPhone: session?.phone ?? "Chưa cập nhật SĐT",
                               selectedAddress: _controller.selectedAddress,
                               onLocationPicked: (address, lat, lng) =>
                                   _controller.updateLocationInfo(

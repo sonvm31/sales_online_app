@@ -6,6 +6,7 @@ import 'package:sales_online_app/ui/shared/profile/widgets/mode_card.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/profile_card.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/seller_action_tile.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/seller_header.dart';
+import 'package:sales_online_app/ui/shared/profile/widgets/seller_revenue_card.dart';
 import 'package:sales_online_app/ui/shared/profile/widgets/shop_preview_button.dart';
 
 class SellerProfileView extends StatelessWidget {
@@ -18,11 +19,15 @@ class SellerProfileView extends StatelessWidget {
   final VoidCallback onSwitchToBuyer;
   final VoidCallback onOpenProducts;
   final VoidCallback onOpenOrders;
-  final VoidCallback onOpenReport;
   final VoidCallback onOpenShopPreview;
+  final VoidCallback onEditProfile;
   final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
+  final double totalRevenue;
+  final bool isLoadingRevenue;
+  final String? revenueErrorMessage;
+  final VoidCallback onRetryRevenue;
 
   const SellerProfileView({
     super.key,
@@ -35,11 +40,15 @@ class SellerProfileView extends StatelessWidget {
     required this.onSwitchToBuyer,
     required this.onOpenProducts,
     required this.onOpenOrders,
-    required this.onOpenReport,
     required this.onOpenShopPreview,
+    required this.onEditProfile,
     required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
+    required this.totalRevenue,
+    required this.isLoadingRevenue,
+    required this.revenueErrorMessage,
+    required this.onRetryRevenue,
   });
 
   @override
@@ -88,6 +97,13 @@ class SellerProfileView extends StatelessWidget {
                     AppSpacing.h24,
                     _SectionTitle(text: 'QUẢN LÝ CỬA HÀNG', color: textColor),
                     AppSpacing.h16,
+                    SellerRevenueCard(
+                      totalRevenue: totalRevenue,
+                      isLoading: isLoadingRevenue,
+                      errorMessage: revenueErrorMessage,
+                      onRetry: onRetryRevenue,
+                    ),
+                    AppSpacing.h16,
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
@@ -112,14 +128,6 @@ class SellerProfileView extends StatelessWidget {
                           isDark: isDark,
                           onTap: onOpenOrders,
                         ),
-                        SellerActionTile(
-                          title: 'Doanh thu',
-                          icon: Icons.trending_up_rounded,
-                          iconColor: const Color(0xFF22C55E),
-                          tintColor: const Color(0xFFEAFBF1),
-                          isDark: isDark,
-                          onTap: onOpenReport,
-                        ),
                       ],
                     ),
                     AppSpacing.h24,
@@ -132,6 +140,7 @@ class SellerProfileView extends StatelessWidget {
                       cardColor: cardColor,
                       textColor: textColor,
                       isDarkThemeEnabled: isDarkThemeEnabled,
+                      onEditProfile: onEditProfile,
                       onOpenSupportCenter: onOpenSupportCenter,
                       onToggleTheme: onToggleTheme,
                       onLogout: onLogout,
@@ -152,6 +161,7 @@ class _UtilityCard extends StatelessWidget {
   final Color cardColor;
   final Color textColor;
   final bool isDarkThemeEnabled;
+  final VoidCallback onEditProfile;
   final VoidCallback onOpenSupportCenter;
   final VoidCallback onToggleTheme;
   final VoidCallback onLogout;
@@ -161,6 +171,7 @@ class _UtilityCard extends StatelessWidget {
     required this.cardColor,
     required this.textColor,
     required this.isDarkThemeEnabled,
+    required this.onEditProfile,
     required this.onOpenSupportCenter,
     required this.onToggleTheme,
     required this.onLogout,
@@ -173,6 +184,16 @@ class _UtilityCard extends StatelessWidget {
       color: cardColor,
       child: Column(
         children: [
+          MenuOption(
+            icon: CupertinoIcons.person_crop_circle,
+            iconColor: AppColors.primary,
+            title: 'Cập nhật hồ sơ',
+            onTap: onEditProfile,
+          ),
+          Divider(
+            color: isDark ? AppColors.borderDark : AppColors.borderLight,
+            height: 20,
+          ),
           MenuOption(
             icon: CupertinoIcons.tickets,
             iconColor: AppColors.primary,

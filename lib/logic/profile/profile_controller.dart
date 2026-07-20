@@ -1,22 +1,34 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
+import 'package:sales_online_app/data/models/seller_revenue_model.dart';
 import 'package:sales_online_app/data/services/shop_service.dart';
+import 'package:sales_online_app/data/services/seller_revenue_service.dart';
 import 'package:sales_online_app/logic/auth/auth_controller.dart';
 
 class ProfileController extends ChangeNotifier {
   final AuthController authController;
   final ShopService _shopService;
+  final SellerRevenueService _revenueService;
 
   late bool _isSellerMode;
   ShopModel? _sellerShop;
   bool _isLoadingShop = false;
   String? _shopErrorMessage;
   bool _isRegisteringShop = false;
+  SellerRevenueModel? _sellerRevenue;
+  bool _isLoadingRevenue = false;
+  String? _revenueErrorMessage;
 
-  ProfileController({required this.authController, ShopService? shopService})
-    : _shopService = shopService ?? ShopService() {
-    _isSellerMode = authController.session?.role.toUpperCase() == 'SELLER';
+  ProfileController({
+    required this.authController,
+    ShopService? shopService,
+    SellerRevenueService? revenueService,
+  }) : _shopService = shopService ?? ShopService(),
+       _revenueService = revenueService ?? SellerRevenueService() {
+    // A role alone is not enough to open the seller UI: the shop can still be
+    // waiting for approval or be locked. Start in Buyer until its status loads.
+    _isSellerMode = false;
     loadSellerShop();
   }
 
@@ -30,6 +42,9 @@ class ProfileController extends ChangeNotifier {
   String? get shopErrorMessage => _shopErrorMessage;
   int get shopId => _sellerShop?.id ?? 0;
   bool get isSellerShopActive => _sellerShop?.isActive == true;
+  double get totalRevenue => _sellerRevenue?.totalRevenue ?? 0;
+  bool get isLoadingRevenue => _isLoadingRevenue;
+  String? get revenueErrorMessage => _revenueErrorMessage;
   ShopRegistrationState get shopRegistrationState {
     if (!hasSellerShop) return ShopRegistrationState.notRegistered;
     if (isSellerShopActive) return ShopRegistrationState.active;
@@ -76,6 +91,8 @@ class ProfileController extends ChangeNotifier {
       return SellerApprovalStatus.active;
     }
 
+    _isSellerMode = false;
+    notifyListeners();
     return SellerApprovalStatus.inactive;
   }
 
@@ -126,11 +143,40 @@ class ProfileController extends ChangeNotifier {
 
     try {
       _sellerShop = await _shopService.fetchShopByOwner(userId);
+      _isSellerMode = _sellerShop!.isActive && isSellerAccount;
+      if (_isSellerMode && _sellerShop!.id > 0) {
+        await loadRevenue(shopId: _sellerShop!.id);
+      }
     } catch (e) {
       _sellerShop = null;
+      _isSellerMode = false;
       _shopErrorMessage = e.toString().replaceFirst('Exception: ', '');
+      _sellerRevenue = null;
     } finally {
       _isLoadingShop = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadRevenue({int? shopId}) async {
+    final id = shopId ?? _sellerShop?.id;
+    if (id == null || id <= 0) {
+      _sellerRevenue = null;
+      _revenueErrorMessage = 'Không tìm thấy shop để tải doanh thu.';
+      notifyListeners();
+      return;
+    }
+
+    _isLoadingRevenue = true;
+    _revenueErrorMessage = null;
+    notifyListeners();
+
+    try {
+      _sellerRevenue = await _revenueService.fetchRevenue(id);
+    } catch (e) {
+      _revenueErrorMessage = e.toString().replaceFirst('Exception: ', '');
+    } finally {
+      _isLoadingRevenue = false;
       notifyListeners();
     }
   }

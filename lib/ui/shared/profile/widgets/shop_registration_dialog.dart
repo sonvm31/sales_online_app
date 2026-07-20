@@ -159,8 +159,6 @@ class _ShopRegistrationDialogState extends State<ShopRegistrationDialog> {
               AppSpacing.h16,
               _AddressPickerField(
                 address: _selectedAddress,
-                latitude: _selectedLatitude,
-                longitude: _selectedLongitude,
                 onTap: _isSubmitting ? null : _pickShopAddress,
               ),
               AppSpacing.h16,
@@ -266,14 +264,10 @@ class _ShopTextField extends StatelessWidget {
 
 class _AddressPickerField extends StatelessWidget {
   final String? address;
-  final double? latitude;
-  final double? longitude;
   final VoidCallback? onTap;
 
   const _AddressPickerField({
     required this.address,
-    required this.latitude,
-    required this.longitude,
     required this.onTap,
   });
 
@@ -329,16 +323,6 @@ class _AddressPickerField extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(color: mutedColor),
                   ),
-                  if (hasAddress && latitude != null && longitude != null) ...[
-                    AppSpacing.h4,
-                    Text(
-                      'Lat: ${latitude!.toStringAsFixed(6)}, Lng: ${longitude!.toStringAsFixed(6)}',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
