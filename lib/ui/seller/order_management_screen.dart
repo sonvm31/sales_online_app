@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/core/utils/order_status_helper.dart';
 import 'package:sales_online_app/data/models/order_model.dart';
 import 'package:sales_online_app/data/services/order_service.dart';
@@ -367,7 +368,7 @@ class _OrderCardState extends State<_OrderCard> {
                   ),
                   const Spacer(),
                   Text(
-                    '${widget.order.totalAmount.toStringAsFixed(0)}đ',
+                    CurrencyFormatter.vnd(widget.order.totalAmount),
                     style: TextStyle(
                       color: textColor,
                       fontWeight: FontWeight.w800,
@@ -552,11 +553,11 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                         ),
                         _DetailRow(
                           label: 'Phí ship',
-                          value: _order!.shippingFee.toStringAsFixed(0),
+                          value: CurrencyFormatter.vnd(_order!.shippingFee),
                         ),
                         _DetailRow(
                           label: 'Tổng tiền',
-                          value: _order!.totalAmount.toStringAsFixed(0),
+                          value: CurrencyFormatter.vnd(_order!.totalAmount),
                         ),
                       ],
                     ),
@@ -639,7 +640,7 @@ class _OrderDetailScreenState extends State<_OrderDetailScreen> {
                                     ),
                                   ),
                                   Text(
-                                    '${item.quantity} x ${item.price.toStringAsFixed(0)}',
+                                    '${item.quantity} x ${CurrencyFormatter.vnd(item.price)}',
                                     style: TextStyle(color: mutedColor),
                                   ),
                                 ],

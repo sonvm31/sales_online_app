@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_strings.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 
 class SellerRevenueCard extends StatelessWidget {
   final double totalRevenue;
@@ -77,7 +78,7 @@ class SellerRevenueCard extends StatelessWidget {
                       )
                     else
                       Text(
-                        '${totalRevenue.toStringAsFixed(0)}đ',
+                        CurrencyFormatter.vnd(totalRevenue),
                         style: AppTextStyles.headingLarge.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,

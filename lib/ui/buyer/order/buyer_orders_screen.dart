@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/core/utils/order_status_helper.dart';
 import 'package:sales_online_app/data/models/order_model.dart';
 import 'package:sales_online_app/logic/buyer/buyer_orders_controller.dart';
@@ -253,7 +254,7 @@ class _BuyerOrderCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    '${order.totalAmount.toStringAsFixed(0)}đ',
+                    CurrencyFormatter.vnd(order.totalAmount),
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w900,

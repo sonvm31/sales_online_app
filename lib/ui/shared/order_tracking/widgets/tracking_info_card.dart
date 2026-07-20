@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_strings.dart';
 import 'package:sales_online_app/core/utils/order_status_helper.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/order_model.dart';
 import 'package:sales_online_app/ui/shared/order_tracking/order_tracking_role.dart';
 import 'package:sales_online_app/ui/shared/order_tracking/widgets/tracking_card.dart';
@@ -45,11 +46,11 @@ class TrackingInfoCard extends StatelessWidget {
           ),
           TrackingInfoRow(
             label: 'Phí vận chuyển',
-            value: '${order.shippingFee.toStringAsFixed(0)}đ',
+            value: CurrencyFormatter.vnd(order.shippingFee),
           ),
           TrackingInfoRow(
             label: AppStrings.orderTrackingTotal,
-            value: '${order.totalAmount.toStringAsFixed(0)}đ',
+            value: CurrencyFormatter.vnd(order.totalAmount),
           ),
         ],
       ),

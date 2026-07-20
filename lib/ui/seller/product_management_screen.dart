@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/category_model.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/data/services/category_service.dart';
@@ -345,7 +346,7 @@ class _ProductTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  '${product.price.toStringAsFixed(0)}đ • Tồn kho: ${product.stockQuantity}',
+                  '${CurrencyFormatter.vnd(product.price)} • Tồn kho: ${product.stockQuantity}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/product_model.dart';
 import 'package:sales_online_app/ui/shared/widgets/app_image.dart';
 
@@ -12,8 +13,7 @@ class ProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final String formattedPrice =
-        "${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}đ";
+    final formattedPrice = CurrencyFormatter.vnd(product.price);
 
     return Material(
       color: Theme.of(context).cardColor,
