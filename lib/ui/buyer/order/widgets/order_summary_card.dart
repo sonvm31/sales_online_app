@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sales_online_app/core/constants/app_styles.dart';
+import 'package:sales_online_app/core/utils/currency_formatter.dart';
 import 'package:sales_online_app/data/models/cart_item_model.dart';
 
 class OrderSummaryCard extends StatelessWidget {
@@ -66,7 +67,7 @@ class OrderSummaryCard extends StatelessWidget {
                   ),
                   AppSpacing.h4,
                   Text(
-                    "${item.totalPrice.toStringAsFixed(0)}đ",
+                    CurrencyFormatter.vnd(item.totalPrice),
                     style: AppTextStyles.bodyLarge.copyWith(
                       color: isDark ? AppColors.textLight : AppColors.textDark,
                       fontWeight: FontWeight.bold,
@@ -93,7 +94,7 @@ class OrderSummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "${totalProductPrice.toStringAsFixed(0)}đ",
+                CurrencyFormatter.vnd(totalProductPrice),
                 style: AppTextStyles.bodyLarge.copyWith(
                   color: isDark ? AppColors.textLight : AppColors.textDark,
                   fontWeight: FontWeight.bold,
@@ -135,7 +136,7 @@ class OrderSummaryCard extends StatelessWidget {
                       ),
                     )
                   : Text(
-                      "${shippingFee.toStringAsFixed(0)}đ",
+                      CurrencyFormatter.vnd(shippingFee),
                       style: AppTextStyles.bodyLarge.copyWith(
                         color: isDark
                             ? AppColors.textLight
@@ -170,7 +171,7 @@ class OrderSummaryCard extends StatelessWidget {
                 ),
               ),
               Text(
-                "${(totalProductPrice + shippingFee).toStringAsFixed(0)}đ",
+                CurrencyFormatter.vnd(totalProductPrice + shippingFee),
                 style: AppTextStyles.headingLarge.copyWith(
                   color: AppColors.primary,
                 ),
