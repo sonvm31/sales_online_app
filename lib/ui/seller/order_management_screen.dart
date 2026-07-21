@@ -353,10 +353,6 @@ class _OrderCardState extends State<_OrderCard> {
                         value: 'SHIPPING',
                         child: Text('Đang giao hàng'),
                       ),
-                      const DropdownMenuItem(
-                        value: 'PAID',
-                        child: Text('Đã thanh toán'),
-                      ),
                       if (widget.order.status.toUpperCase() == 'DONE')
                         const DropdownMenuItem(
                           value: 'DONE',
