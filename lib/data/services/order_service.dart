@@ -106,7 +106,7 @@ class OrderService {
     try {
       final response = await _dio.put(
         '/orders/$orderId/status',
-        queryParameters: <String, dynamic>{'status': status},
+        data: <String, dynamic>{'status': status},
       );
 
       if (response.statusCode == 200) {
